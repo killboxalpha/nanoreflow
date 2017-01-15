@@ -6,6 +6,7 @@
 
 //#define FAKE_HW 1
 //#define PIDTUNE 1 // autotune wouldn't fit in the 28k available on my arduino pro micro.
+//#define WITH_BEEPER // Enables Beeper
 
 // run a calibration loop that measures how many timer ticks occur between 2 zero corssings
 // FIXME: does not work reliably at the moment, so a oscilloscope-determined value is used.
@@ -735,7 +736,9 @@ void abortWithError(int error) {
     tft.print("during ");
     tft.println((error == 10) ? "heating" : "cooling");
   }
-  tone(PIN_BEEPER,1760,2000);  //Error Beep
+  #ifdef WITH_BEEPER
+    tone(PIN_BEEPER,1760,2000);  //Error Beep
+  #endif
   while (1) { //  stop
     ;
   }
@@ -1008,8 +1011,10 @@ void setup() {
   PID.SetMode(AUTOMATIC);
 
   delay(1000);
-  
-  tone(PIN_BEEPER,1760,100);
+
+  #ifdef WITH_BEEPER
+    tone(PIN_BEEPER,1760,100);
+  #endif
   
   menuExit(Menu::actionDisplay); // reset to initial state
   Engine.navigate(&miCycleStart);
@@ -1279,18 +1284,22 @@ void loop(void)
           PID.SetControllerDirection(REVERSE);
           PID.SetTunings(fanPID.Kp, fanPID.Ki, fanPID.Kd);
           Setpoint = idleTemp;
-          tone(PIN_BEEPER,1760,1000);  // Beep as a reminder that CoolDown starts (and maybe open up the oven door for fast enough cooldown)
+          #ifdef WITH_BEEPER
+            tone(PIN_BEEPER,1760,1000);  // Beep as a reminder that CoolDown starts (and maybe open up the oven door for fast enough cooldown)
+          #endif
         }
 
         if (Input < (idleTemp + 5)) {
           currentState = Complete;
           PID.SetMode(MANUAL);
           Output = 0;
-          tone(PIN_BEEPER,1760,500);  //End Beep
-          delay(500);
-          tone(PIN_BEEPER,1760,500);
-          delay(500);
-          tone(PIN_BEEPER,1760,1500);
+          #ifdef WITH_BEEPER
+            tone(PIN_BEEPER,1760,500);  //End Beep
+            delay(500);
+            tone(PIN_BEEPER,1760,500);
+            delay(500);
+            tone(PIN_BEEPER,1760,1500);
+          #endif
         }
 
 #ifdef PIDTUNE
