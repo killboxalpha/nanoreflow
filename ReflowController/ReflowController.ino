@@ -24,10 +24,16 @@
 #ifdef PIDTUNE
 #include <PID_AutoTune_v0.h>
 #endif
+// ----------------------------------------------------------------------------
+
 
 // ----------------------------------------------------------------------------
 volatile uint32_t timerTicks     = 0;
 volatile uint8_t  phaseCounter   = 0;
+// ----------------------------------------------------------------------------
+
+
+
 // ----------------------------------------------------------------------------
 
 uint32_t lastUpdate = 0;
@@ -70,6 +76,8 @@ double rateOfRise = 0;          // the result that is displayed
 double totalT1 = 0;             // the running total
 double averageT1 = 0;           // the average
 uint8_t index = 0;              // the index of the current reading
+uint8_t thermocoupleErrorCount;
+
 
 // ----------------------------------------------------------------------------
 // Ensure that Solid State Relais are off when starting
@@ -245,12 +253,17 @@ Serial.println("Reflow controller started");
 
 
 
-  // wait for MAX chip to stabilize
-   delay(500);
+  
   // setup /CS line for thermocouple and read initial temperature
   A.chipSelect = PIN_TC_CS;
-  digitalWrite(A.chipSelect, HIGH);
-  readThermocouple(&A);
+  
+  do {
+    // wait for MAX chip to stabilize
+   delay(500);
+   readThermocouple(&A);
+  }
+  while ((A.stat == TEMP_READ_ERROR) && (thermocoupleErrorCount++ < TC_ERROR_TOLERANCE));
+    
 
   if (A.stat != 0) {
     abortWithError(A.stat);
@@ -353,8 +366,6 @@ void toggleAutoTune() {
 
 // ----------------------------------------------------------------------------
 
-uint8_t thermocoupleErrorCount;
-#define TC_ERROR_TOLERANCE 5 // allow for n consecutive errors due to noisy power supply before bailing out
 
 
 // ----------------------------------------------------------------------------
@@ -444,50 +455,50 @@ void loop(void)
 
     if (A.stat > 0) {
       thermocoupleErrorCount++;
+       if (thermocoupleErrorCount > TC_ERROR_TOLERANCE) {
+        abortWithError(A.stat);
+      }
     }
     else {
-      thermocoupleErrorCount = 0;
-    }
-
-    if (thermocoupleErrorCount > TC_ERROR_TOLERANCE) {
-      abortWithError(A.stat);
-    }
-
+        thermocoupleErrorCount = 0;
 #if 0 // verbose thermocouple error bits
-    tft.setCursor(10, 40);
-    for (uint8_t mask = B111; mask; mask >>= 1) {
-      tft.print(mask & A.stat ? '1' : '0');
-    }
+        tft.setCursor(10, 40);
+        for (uint8_t mask = B111; mask; mask >>= 1) {
+          tft.print(mask & A.stat ? '1' : '0');
+        }
 #endif
-      
-    // rolling average of the temp T1 and T2
-    totalT1 -= readingsT1[index];       // subtract the last reading
-    readingsT1[index] = A.temperature;
-    totalT1 += readingsT1[index];       // add the reading to the total
-    index = (index + 1) % NUM_TEMP_READINGS;  // next position
-    averageT1 = totalT1 / NUM_TEMP_READINGS;  // calculate the average temp
-
-    // need to keep track of a few past readings in order to work out rate of rise
-    for (int i = 1; i < NUM_TEMP_READINGS; i++) { // iterate over all previous entries, moving them backwards one index
-      airTemp[i - 1].temp = airTemp[i].temp;
-      airTemp[i - 1].ticks = airTemp[i].ticks;     
-    }
-
-    airTemp[NUM_TEMP_READINGS - 1].temp = averageT1; // update the last index with the newest average
-    airTemp[NUM_TEMP_READINGS - 1].ticks = (uint16_t)deltaT;
-
-    // calculate rate of temperature change
-    uint32_t collectTicks = 0;
-    for (int i = 0; i < NUM_TEMP_READINGS; i++) {
-      collectTicks += airTemp[i].ticks;
-    }
-    float tempDiff = (airTemp[NUM_TEMP_READINGS - 1].temp - airTemp[0].temp);
-    float timeDiff = collectTicks / (HERZS *2);
+        // rolling average of the temp T1 and T2
+        totalT1 -= readingsT1[index];       // subtract the last reading
+        readingsT1[index] = A.temperature;
+        totalT1 += readingsT1[index];       // add the reading to the total
+        index = (index + 1) % NUM_TEMP_READINGS;  // next position
+        averageT1 = totalT1 / (float)NUM_TEMP_READINGS;  // calculate the average temp
     
-    rampRate = tempDiff / timeDiff;
- 
-    Input = airTemp[NUM_TEMP_READINGS - 1].temp; // update the variable the PID reads
-
+        // need to keep track of a few past readings in order to work out rate of rise
+        for (int i = 1; i < NUM_TEMP_READINGS; i++) { // iterate over all previous entries, moving them backwards one index
+          airTemp[i - 1].temp = airTemp[i].temp;
+          airTemp[i - 1].ticks = airTemp[i].ticks;     
+        }
+    
+        airTemp[NUM_TEMP_READINGS - 1].temp = averageT1; // update the last index with the newest average
+        airTemp[NUM_TEMP_READINGS - 1].ticks = (uint16_t)deltaT;
+    
+        // calculate rate of temperature change
+        uint32_t collectTicks = 0;
+        for (int i = 0; i < NUM_TEMP_READINGS; i++) {
+          collectTicks += airTemp[i].ticks;
+        }
+        float tempDiff = (airTemp[NUM_TEMP_READINGS - 1].temp - airTemp[0].temp);
+        float timeDiff = collectTicks / (HERZS *2);
+        
+        rampRate = tempDiff / timeDiff;
+     
+        Input = airTemp[NUM_TEMP_READINGS - 1].temp; // update the variable the PID reads
+           
+#ifdef SERIAL_VERBOSE
+       Serial.println(Input);
+#endif
+    }
     // display update
     if (zeroCrossTicks - lastDisplayUpdate > TICKS_TO_REDRAW) {
       lastDisplayUpdate = zeroCrossTicks;
