@@ -5,8 +5,11 @@
 #include <SPI.h>
 #include "config.h"
 
+#ifdef SENSOR_MAX6675
+#define MIN_VALID_TEMP_MAX6675 10
+#define MAX_VALID_TEMP_MAX6675 500
+#endif
 
-#ifdef SENSOR_MAX31855
 typedef union {
   uint32_t value;
   uint8_t bytes[4];
@@ -44,28 +47,17 @@ typedef union {
     uint8_t FaultShortGround:1;
     uint8_t FaultOpen:1;
   };
-} __attribute__((packed)) MAX31855_t;
+} __attribute__((packed)) MAXSENSOR_t;
 
-#else ifdef SENSOR_MAX6675
 
-#define MIN_VALID_TEMP_MAX6675 10
-#define MAX_VALID_TEMP_MAX6675 500
 
-typedef union {
-  uint16_t value;
-  uint8_t bytes[2];
-} __attribute__((packed)) MAX6675_t;
-
-#endif
-
+MAXSENSOR_t sensor;
 
 typedef struct Thermocouple {
   double temperature;
   uint8_t stat;
   uint8_t chipSelect;
 };
-
-
 
 
 void readThermocouple(struct Thermocouple* input) {
@@ -78,7 +70,6 @@ void readThermocouple(struct Thermocouple* input) {
 
   
 #ifdef SENSOR_MAX31855
-  MAX31855_t sensor;
   
   for (int8_t i = 3; i >= 0; i--) {
     sensor.bytes[i] = SPI.transfer(0x00);
@@ -90,12 +81,13 @@ void readThermocouple(struct Thermocouple* input) {
   input->temperature = value * 0.25;
 
 #else ifdef SENSOR_MAX6675
-  MAX6675_t sensor;
   sensor.bytes[3] = 0;
   sensor.bytes[2] = 0;
   sensor.bytes[1] = SPI.transfer(0x00);
   sensor.bytes[0] = SPI.transfer(0x00);
-  if (sensor.value & 0x4) {}
+  if (sensor.value & 0x4) {
+    sensor.Fault = 1;
+    }
   else {
     sensor.value >>= 3;
     double temp = sensor.value *0.25;
@@ -103,6 +95,7 @@ void readThermocouple(struct Thermocouple* input) {
     if ((temp > MIN_VALID_TEMP_MAX6675) && (temp < MAX_VALID_TEMP_MAX6675)) {
       input->temperature = temp;
     }
+    else sensor.Fault = 1;
   }
 
 #endif
@@ -110,10 +103,7 @@ void readThermocouple(struct Thermocouple* input) {
   digitalWrite(input->chipSelect, HIGH); 
 
   digitalWrite(LCD_CS, lcdState);
-  
-  
-  
- 
+
 }
 
 
