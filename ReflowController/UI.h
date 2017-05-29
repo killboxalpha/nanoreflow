@@ -629,7 +629,7 @@ void updateProcessDisplay() {
     tmp = w / estimatedTotalTime ; 
     pxPer10S = (float)tmp;
    
-#ifdef GRAPH_VERBOSE
+#ifdef SERIAL_VERBOSE
  Serial.print("estimatedTotalTime: ");
     Serial.println(estimatedTotalTime);
     Serial.print("pxPer10S: ");
