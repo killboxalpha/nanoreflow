@@ -4,10 +4,8 @@ Reflow Oven Controller
 
 **News**
 
-* Some PCBs & parts are available on Tindie.
-
-<a href="https://www.tindie.com/stores/0xPIT/?ref=offsite_badges&utm_source=sellers_0xPIT&utm_medium=badges&utm_campaign=badge_small"><img src="https://d2ss6ovg47m0r5.cloudfront.net/badges/tindie-smalls.png" alt="I sell on Tindie" height="40"></a>
-
+* Forked from 0xPIT & uploaded the code heavy reestructuration
+* Board design has also changed
 
 **Arduino-based reflow oven controller with:**
 * [PID] loop control
@@ -24,6 +22,7 @@ Reflow Oven Controller
 * could also be used for slow coockers
 * *Please Note*: Requires Arduino IDE 1.5.x or newer
 
+(c) 2017 David Sanz Kirbis
 (c) 2014 Karl Pitrich <karl@pitrich.com>
 in part based on a project (c) 2013 Ed Simmons <ed@estechnical.co.uk>
 
@@ -36,7 +35,7 @@ in part based on a project (c) 2013 Ed Simmons <ed@estechnical.co.uk>
 
 ## Warning: This project operates with possibly lethal mains voltage. If you are unsure what to do, don't do it and get help from an experienced tinkerer with professional training.
 
-
+<!---
 **Completed build**
 
 ![Completed1] | ![Completed2]
@@ -46,7 +45,7 @@ in part based on a project (c) 2013 Ed Simmons <ed@estechnical.co.uk>
 Introduction
 ====================
 
-This Reflow Oven Controller relies on an [Arduino Pro Micro], which is similar to the Leonardo and easily obtainable on eb*y for less than $10, plus my custom shield, which is actually more like a motherboard.
+This Reflow Oven Controller relies on an [Arduino Nano] easily obtainable on eb*y for less than $10, plus my custom shield, which is actually more like a motherboard.
 
 As I believe it is not wise to have a mess of wiring and tiny breakout-boards for operating mains powered equipment, I've decided to design custom board with easily obtainable components.
 
@@ -55,9 +54,7 @@ The hardware can be found in the [folder hardware], including the Eagle schemati
 ![PCB][ImgPCB]
 ![Schematic][ImgSCH]
 
-From my manufacturing run, I have some spare PCBs and parts. They are available at my [tindie store].
-
-The board contains the [Arduino Pro Micro], very simple [Zero crossing] detection circuit, used to align control logic to mains frequency, two [MAX31855] thermocouple-to-digital converters and two [Sharp S202S01] PCB-mount solid state relays, mounted on cheap [Fischer SK409 50,8] heat sinks. The current software uses only one of the thermocouples, so you need to populate one IC only. If you're lucky, you can get free samples of the MAX31855 from Maxim.
+The board contains the [Arduino Nano], very simple [Zero crossing] detection circuit, used to align control logic to mains frequency, two [MAX31855] thermocouple-to-digital converters and two [Sharp S202S01] PCB-mount solid state relays, mounted on cheap [Fischer SK409 50,8] heat sinks. The current software uses only one of the thermocouples, so you need to populate one IC only. If you're lucky, you can get free samples of the MAX31855 from Maxim.
 
 The software uses [PID] control of the heater and fan output for improved temperature stability. The heater AC load is controlled using [Wave Packet] control in order to minimize RF interference and load on the relay. For the fan motor, [Phase Fired] control has been implemented.
 
@@ -70,8 +67,7 @@ Errata and construction infos
 
 Issue | Notes
 ------------ | -------------
-Unfortunately, a trace is missing on the production PCB, you need to solder a bridge. The PCB eagle source has been corrected. | ![Missing Trace][ImgMissingTrace]
-I've used a switch mode power supply which induces a lot of noise on the power supply, causing the MAX31855 to be quite eratic, reporting VCC and GND shots where there are none. Use a linear power supply if you can. | I've added a LC-filter (100µH + 1000µF/100n) + ferrite beads between the PSU and the controller PCB.
+
 
 
 Screenshots and usage information
@@ -88,14 +84,14 @@ Image | Information
 ![MenuLoadProfile] | *Up to 30 Profiles can be loaded and saved. You have to do this manually, so that you can have 'save-as' functionality without overwriting existing profiles.*
 ![PIDValues] | *Current pid values for my 1300W 20$ toaster oven.*
 ![PIDValuesEdit] | *Editing is simple, like above. Note that, unlike with the profile settings, the PID values will be automatically stored to EEPROM when you exit the submenu by doubleclicking.*
-
+--->
 
 Obtaining the source code
 ====================
 
 Get the code using `git`.
 
-	git clone https://github.com/estechnical/reflowOvenController.git
+	git clone https://github.com/dasaki/reflowOvenController.git
 
 or [download a Snapshot].
 
@@ -129,7 +125,7 @@ All other libraries need to be downloaded and installed.
 
 After you've installed all libraries, open the Arduino IDE, open the ReflowController.pde sketch (using File->Open).
 
-Select the right hardware from the Tools->Board menu. (Use Leonardo for the Pro Micro)
+Select the right hardware from the Tools->Board menu.
 
 Compile the firmware (Sketch->Verify) to test everything is installed correctly. If something's wrong, feel free to post an issue here on github, I will look into it.
 
@@ -211,8 +207,7 @@ THE SOFTWARE.
 [Adafruit_ST7735-pit]:https://github.com/0xPIT/Adafruit-ST7735-Library
 [Menu]:https://github.com/0xPIT/menu
 [ClickEncoder]:https://github.com/0xPIT/encoder
-[Arduino Pro Micro]:https://www.sparkfun.com/products/12640
-[tindie store]:https://www.tindie.com/products/0xPIT/reflow-oven-controller-motherboard-for-arduino-pro-micro/
+[Arduino Nano]:https://store.arduino.cc/arduino-nano
 
 [CycleWithOverflow]:https://raw.githubusercontent.com/0xPIT/reflowOvenController/master/images/CycleWithOverflow.jpg
 [FanSpeedEdit]:https://raw.githubusercontent.com/0xPIT/reflowOvenController/master/images/FanSpeedEdit.jpg
