@@ -7,8 +7,10 @@
 
 #ifdef SENSOR_MAX6675
 #define MIN_VALID_TEMP_MAX6675 10
-#define MAX_VALID_TEMP_MAX6675 500
+#define MAX_VALID_TEMP_MAX6675 400
 #endif
+
+#define TEMP_READ_ERROR 10
 
 typedef union {
   uint32_t value;
@@ -86,7 +88,7 @@ void readThermocouple(struct Thermocouple* input) {
   sensor.bytes[1] = SPI.transfer(0x00);
   sensor.bytes[0] = SPI.transfer(0x00);
   if (sensor.value & 0x4) {
-    sensor.Fault = 1;
+    input->stat = TEMP_READ_ERROR;
     }
   else {
     sensor.value >>= 3;
@@ -94,8 +96,9 @@ void readThermocouple(struct Thermocouple* input) {
     // got wrong readings of the MAX6675 with value 1
     if ((temp > MIN_VALID_TEMP_MAX6675) && (temp < MAX_VALID_TEMP_MAX6675)) {
       input->temperature = temp;
+      input->stat = 0;
     }
-    else sensor.Fault = 1;
+    else input->stat = TEMP_READ_ERROR;
   }
 
 #endif
