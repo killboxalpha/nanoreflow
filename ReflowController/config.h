@@ -12,7 +12,7 @@
 //#define PIDTUNE 1 // autotune wouldn't fit in the 28k available on my arduino pro micro.
 #define WITH_BEEPER // Enables Beeper
 //#define WITH_SERVO // Enables Lid opening Servo (not yet implemented)
-#define GRAPH_VERBOSE 1
+//#define SERIAL_VERBOSE 1
 
 // run a calibration loop that measures how many timer ticks occur between 2 zero corssings
 // FIXME: does not work reliably at the moment, so a oscilloscope-determined value is used.
@@ -34,33 +34,27 @@
 #define LCD_ROTATION 3 // 0/2-> portrait, 1/3-> landscape
 
 #define PIN_TC_CS  A2
-
 #define PIN_HEATER   3 // SSR for the heater
 #define PIN_FAN      A4 // SSR for the fan
 #define PIN_BEEPER   A3 // Beeper Out
-
-
-
-#define PIN_ENC_A   4 // Beeper Out
-#define PIN_ENC_B   5 // Beeper Out
-#define PIN_ENC_BTN 6 // Beeper Out
-
+// --- encoder
+#define PIN_ENC_A   4 // 
+#define PIN_ENC_B   5 // 
+#define PIN_ENC_BTN 6 // 
 #define ENC_STEPS_PER_NOTCH 2
 #define IS_ENC_ACTIVE false // encoder module actively fed with VCC ( seems to works bad if set to true )
-
-
-#define PIN_BEEPER   A3 // Beeper Out
-#define PIN_BEEPER   A3 // Beeper Out
-#define PIN_BEEPER   A3 // Beeper Out
 
 #define BEEP_FREQ 1976 // B6 note
 
 #define PIN_ZX       2 // pin for zero crossing detector
 #define INT_ZX       digitalPinToInterrupt(PIN_ZX) // interrupt for zero crossing detector
 
-
-
 #define NUM_TEMP_READINGS 5
+#define TC_ERROR_TOLERANCE 5 // allow for n consecutive errors due to noisy power supply before bailing out
+
+#define TICKS_TO_UPDATE 30
+#define TICKS_TO_REDRAW TICKS_TO_UPDATE*2
+
 
 
 // see: https://www.compuphase.com/electronics/reflowsolderprofiles.htm  
@@ -73,10 +67,6 @@
 #define DEFAULT_RAMP_DOWN_RATE 2.0 // degrees / second
 #define FACTORY_FAN_ASSIST_SPEED 33
 #define PID_SAMPLE_TIME 200
-#define FACTORY_KP  4.0 
-#define FACTORY_KI 0.05 
-#define FACTORY_KD 2.0 
-
 
 /*
 Kp: Determines how aggressively the PID reacts to the current amount of error (Proportional) (double >=0)
@@ -97,7 +87,12 @@ Experimental method to tune PID:
 
 */
 
-#define TICKS_TO_UPDATE 30
-#define TICKS_TO_REDRAW TICKS_TO_UPDATE*2
+#define FACTORY_KP  4.0 
+#define FACTORY_KI 0.05 
+#define FACTORY_KD 2.0 
+
+
+
+
 
 #endif // CONFIG_H
