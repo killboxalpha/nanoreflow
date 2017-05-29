@@ -111,11 +111,7 @@ There as several dependencies you need to install.
 If you are unfamiliar with Arduino Libraries, please read [the library guide].
 Basically, each library needs to be liked or copied into your Arduino library folder.
 
-On a Mac, this is how you link the submodule libraries to your Arduino libraries folder:
-
-    cd ~/Documents/Arduino/Libraries
-    ln -s ~/Development/<reflow source code>/libraries
-    
+<!---
 My code uses [TimerOne] for basic timing, for the 1.8" TFT I've used [Adafruit_ST7735], which requires [Adafruit_GFX]. I **strongly suggest** to use my **modified version** of [Adafruit_ST7735-pit], as it **performs much better**, but requires you to use SPI, which my board does anyway.
 
 For the user interface you require my own [Menu] and [ClickEncoder] libraries, which are included as submodules.
@@ -155,6 +151,7 @@ Ideas and todo
 * try to make the display faster, it is very slow
 * Named profiles
 * Rewrite [Menu] so that is uses callback objects instead of spaghetti-callbacks
+--->
 
 Licensing
 ====================
