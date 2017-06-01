@@ -4,7 +4,7 @@ Reflow Oven Controller
 
 **News**
 
-* Forked from 0xPIT & uploaded the code heavy reestructuration
+* Forked from 0xPIT & uploaded the code after a lot of reestructuration
 * Board design has also changed
 
 **Arduino-based reflow oven controller with:**
