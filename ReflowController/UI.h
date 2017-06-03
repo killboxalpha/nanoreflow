@@ -19,34 +19,42 @@
 // ----------------------------------------------------------------------------
 // Hardware Configuration 
 
-// 1.8" TFT via SPI -> breadboard
+// 1.44" or 1.8" TFT via SPI -> breadboard
 
-
-
-#define TEMPERATURE_WINDOW 1.2 // times the profile's maximum temperature
+#define TEMPERATURE_WINDOW 1.2 // n times the profile's maximum temperature
 
 
 // ----------------------------------------------------------------------------
-// UI
 
-// NB: Adafruit GFX ASCII-Table is bogous: https://github.com/adafruit/Adafruit-GFX-Library/issues/22
-//
+
 PDQ_ST7735 tft;     // PDQ: create LCD object (using pins in "PDQ_ST7735_config.h")
 
 
-ClickEncoder Encoder(PIN_ENC_A, PIN_ENC_B, PIN_ENC_BTN, ENC_STEPS_PER_NOTCH, IS_ENC_ACTIVE);
-
+// ------------ menu
 
 Menu::Engine MenuEngine;
 
+const uint8_t menuItemHeight = 12;
+const uint8_t menuItemsVisible = 8;
+bool menuUpdateRequest = true;
+bool initialProcessDisplay = false;
+
+// track menu item state to improve render preformance
+typedef struct {
+  const Menu::Item_t *mi;
+  uint8_t pos;
+  bool current;
+} LastItemState_t;
+
+LastItemState_t currentlyRenderedItems[menuItemsVisible];
+
+// ------------ encoder
+ClickEncoder Encoder(PIN_ENC_A, PIN_ENC_B, PIN_ENC_BTN, ENC_STEPS_PER_NOTCH, IS_ENC_ACTIVE);
 int16_t encMovement;
 int16_t encAbsolute;
 int16_t encLastAbsolute = -1;
 
-const uint8_t menuItemsVisible = 5;
-const uint8_t menuItemHeight = 12;
-bool menuUpdateRequest = true;
-bool initialProcessDisplay = false;
+// ------------ 
 
 float pxPer10S;
 float pxPerC;
@@ -54,6 +62,14 @@ uint16_t xOffset; // used for wraparound on x axis
 
 
 void setupTFT() {
+
+  
+    FastPin<ST7735_RST_PIN>::setOutput();
+  FastPin<ST7735_RST_PIN>::hi();
+  FastPin<ST7735_RST_PIN>::lo();
+  delay(1);
+  FastPin<ST7735_RST_PIN>::hi();
+  
    tft.begin();
   
   tft.setTextWrap(false);
@@ -94,6 +110,7 @@ void displaySplash() {
 
 void displayError(int error) {
 
+  tft.setTextSize(1);
   tft.setTextColor(ST7735_WHITE, ST7735_RED);
   tft.fillScreen(ST7735_RED);
 
@@ -136,7 +153,20 @@ void displayError(int error) {
 
 // ----------------------------------------------------------------------------
 
-void displayThermocoupleData(struct Thermocouple* input) {
+void alignRightPrefix(uint16_t v) {
+  if (v < 1e2) tft.print(' '); 
+  if (v < 1e1) tft.print(' ');
+}
+
+// ----------------------------------------------------------------------------
+
+void displayThermocoupleData(uint8_t xpos, uint8_t ypos, struct Thermocouple* input) {
+  tft.setCursor(xpos, ypos);
+  tft.setTextColor(ST7735_BLACK, ST7735_WHITE);
+
+  // temperature
+  tft.setTextSize(2);
+  alignRightPrefix((int)A.temperature);
   switch (input->stat) {
     case 0:
       tft.print((uint8_t)input->temperature);
@@ -148,24 +178,9 @@ void displayThermocoupleData(struct Thermocouple* input) {
   }
 }
 
-// ----------------------------------------------------------------------------
-
-void alignRightPrefix(uint16_t v) {
-  if (v < 1e2) tft.print(' '); 
-  if (v < 1e1) tft.print(' ');
-}
-
 
 // ----------------------------------------------------------------------------
 
-// track menu item state to improve render preformance
-typedef struct {
-  const Menu::Item_t *mi;
-  uint8_t pos;
-  bool current;
-} LastItemState_t;
-
-LastItemState_t currentlyRenderedItems[menuItemsVisible];
 
 void clearLastMenuItemRenderState() {
   // memset(&currentlyRenderedItems, 0xff, sizeof(LastItemState_t) * menuItemsVisible);
@@ -276,6 +291,7 @@ bool menu_editNumericalValue(const Menu::Action_t action) {
     bool initial = currentState != Edit;
     currentState = Edit;
 
+    tft.setTextSize(1);
     if (initial) {
       tft.setTextColor(ST7735_BLACK, ST7735_WHITE);
       tft.setCursor(MENU_TEXT_XPOS, 80);
@@ -357,9 +373,10 @@ bool menu_editNumericalValue(const Menu::Action_t action) {
 void factoryReset() {
 #ifndef PIDTUNE
   makeDefaultProfile();
-
+  
   tft.fillScreen(ST7735_BLUE);
   tft.setTextColor(ST7735_YELLOW);
+  tft.setTextSize(1);
   tft.setCursor(10, 50);
   tft.print("Resetting...");
 
@@ -393,9 +410,10 @@ bool menu_factoryReset(const Menu::Action_t action) {
 
     if (initial) { // TODO: add eyecandy: colors or icons
       tft.setTextColor(ST7735_BLACK, ST7735_WHITE);
-      tft.setCursor(10, 80);
+      tft.setTextSize(1);
+      tft.setCursor(10, tft.height()-38);
       tft.print("Click to confirm");
-      tft.setCursor(10, 90);
+      tft.setCursor(10, tft.height()-28);
       tft.print("Doubleclick to exit");
     }
   }
@@ -420,6 +438,7 @@ bool menu_factoryReset(const Menu::Action_t action) {
 
 void memoryFeedbackScreen(uint8_t profileId, bool loading) {
   tft.fillScreen(ST7735_GREEN);
+  tft.setTextSize(1);
   tft.setTextColor(ST7735_BLACK);
   tft.setCursor(10, 50);
   tft.print(loading ? "Loading" : "Saving");
@@ -465,6 +484,7 @@ bool menu_saveLoadProfile(const Menu::Action_t action) {
     currentState = Edit;
 
     tft.setTextColor(ST7735_BLACK, ST7735_WHITE);
+    tft.setTextSize(1);
 
     if (initial) {
       encAbsolute = activeProfileId;      
@@ -535,6 +555,7 @@ void renderMenuItem(const Menu::Item_t *mi, uint8_t pos) {
   }
 
   tft.setCursor(MENU_TEXT_XPOS, y);
+  tft.setTextSize(1);
 
   // menu cursor bar
   tft.fillRect(MENU_BAR_XPOS, y - 2, tft.width() - 16, menuItemHeight, isCurrent ? ST7735_BLUE : ST7735_WHITE);
@@ -601,6 +622,7 @@ void updateProcessDisplay() {
 
   // header & initial view
   tft.setTextColor(ST7735_WHITE, ST7735_BLUE);
+  tft.setTextSize(1);
 
   if (!initialProcessDisplay) {
     initialProcessDisplay = true;
@@ -622,8 +644,8 @@ void updateProcessDisplay() {
     double estimatedTotalTime = 0;//60 * 12;
     // estimate total run time for current profile
     estimatedTotalTime = activeProfile.soakDuration + activeProfile.peakDuration;
-    estimatedTotalTime += (activeProfile.peakTemp - A.temperature)/activeProfile.rampUpRate;
-    estimatedTotalTime += (activeProfile.peakTemp - A.temperature)/activeProfile.rampDownRate;
+    estimatedTotalTime += (activeProfile.peakTemp - A.temperature)/(float)activeProfile.rampUpRate;
+    estimatedTotalTime += (activeProfile.peakTemp - A.temperature)/(float)activeProfile.rampDownRate;
     estimatedTotalTime *= 1.1; // add some spare
     
     tmp = w / estimatedTotalTime ; 
@@ -675,13 +697,9 @@ void updateProcessDisplay() {
 
   y += menuItemHeight + 2;
 
-  tft.setCursor(1, y);
-  tft.setTextColor(ST7735_BLACK, ST7735_WHITE);
 
-  // temperature
-  tft.setTextSize(2);
-  alignRightPrefix((int)A.temperature);
-  displayThermocoupleData(&A);
+  displayThermocoupleData(1, y, &A);
+  
   tft.setTextSize(1);
 
 #ifndef PIDTUNE
