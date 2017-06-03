@@ -15,6 +15,7 @@
 #include <Menu.h>
 #include <ClickEncoder.h>
 #include <TimerOne.h>
+#include <digitalWriteFast.h>
 
 #include "temperature.h"
 #include "helpers.h"
@@ -84,8 +85,12 @@ uint8_t thermocoupleErrorCount;
 //
 void setupPins(void) {
 
-DDRD |= ((1 << PIN_HEATER) | (1 << PIN_FAN)); // Output
-PORTD |= (1 << PIN_HEATER) | (1 << PIN_FAN); // off
+//DDRD |= ((1 << PIN_HEATER) | (1 << PIN_FAN)); // Output
+//PORTD |= (1 << PIN_HEATER) | (1 << PIN_FAN); // off
+pinMode(PIN_HEATER, OUTPUT);
+digitalWriteFast(PIN_HEATER, HIGH);
+pinMode(PIN_FAN, OUTPUT);
+digitalWriteFast(PIN_FAN, HIGH);
 pinMode(PIN_ZX, INPUT_PULLUP);
 //DDRD &= ~((1 << PIN_ZX)); // input
 pinMode(PIN_TC_CS, OUTPUT);
@@ -121,9 +126,9 @@ typedef struct Channel_s {
 
 Channel_t Channels[CHANNELS] = {
   // heater
-  { 0, 0, 0, false, 3 }, // PD2 == RX == Arduino Pin 0
+  { 0, 0, 0, false, PIN_HEATER }, 
   // fan
-  { 0, 0, 0, false, 2 }  // PD3 == TX == Arduino Pin 1
+  { 0, 0, 0, false, PIN_FAN } 
 };
 
 // delay to align relay activation with the actual zero crossing
@@ -198,8 +203,8 @@ void timerIsr(void) { // ticks with 100µS
   if (Channels[CHANNEL_HEATER].next > lastTicks // FIXME: this looses ticks when overflowing
       && timerTicks > Channels[CHANNEL_HEATER].next) 
   {
-    if (Channels[CHANNEL_HEATER].action) PORTD |= (1 << Channels[CHANNEL_HEATER].pin);
-    else PORTD &= ~(1 << Channels[CHANNEL_HEATER].pin);
+    if (Channels[CHANNEL_HEATER].action) digitalWriteFast(Channels[CHANNEL_HEATER].pin, HIGH);
+    else digitalWriteFast(Channels[CHANNEL_HEATER].pin, LOW);
     lastTicks = timerTicks;
   }
 
@@ -223,25 +228,16 @@ void abortWithError(int error) {
 }
 // ----------------------------------------------------------------------------
 
-
-// ----------------------------------------------------------------------------
-
 void setup() {
-  setupPins();
-
-
-
-Serial.begin(115200);
-Serial.println("Reflow controller started");
-  //tft.initR(INITR_BLACKTAB);
-
-    FastPin<ST7735_RST_PIN>::setOutput();
-  FastPin<ST7735_RST_PIN>::hi();
-  FastPin<ST7735_RST_PIN>::lo();
-  delay(1);
-  FastPin<ST7735_RST_PIN>::hi();
+#ifdef SERIAL_VERBOSE
+  Serial.begin(115200);
+  Serial.println("Reflow controller started");
+#endif
   
- setupTFT();
+  setupPins();
+  
+ 
+  setupTFT();
 
   if (firstRun()) {
     factoryReset();
@@ -265,7 +261,7 @@ Serial.println("Reflow controller started");
   while ((A.stat == TEMP_READ_ERROR) && (thermocoupleErrorCount++ < TC_ERROR_TOLERANCE));
     
 
-  if (A.stat != 0) {
+  if ((A.stat != 0) || (thermocoupleErrorCount  >= TC_ERROR_TOLERANCE)) {
     abortWithError(A.stat);
   }
 
@@ -455,9 +451,9 @@ void loop(void)
 
     if (A.stat > 0) {
       thermocoupleErrorCount++;
-       if (thermocoupleErrorCount > TC_ERROR_TOLERANCE) {
+       if ((thermocoupleErrorCount > TC_ERROR_TOLERANCE) && (currentState != Edit)) {
         abortWithError(A.stat);
-      }
+      } else thermocoupleErrorCount = 0;
     }
     else {
         thermocoupleErrorCount = 0;
@@ -489,14 +485,14 @@ void loop(void)
           collectTicks += airTemp[i].ticks;
         }
         float tempDiff = (airTemp[NUM_TEMP_READINGS - 1].temp - airTemp[0].temp);
-        float timeDiff = collectTicks / (HERZS *2);
+        float timeDiff = collectTicks / (float)(HERZS *2.0);
         
         rampRate = tempDiff / timeDiff;
      
         Input = airTemp[NUM_TEMP_READINGS - 1].temp; // update the variable the PID reads
            
 #ifdef SERIAL_VERBOSE
-       Serial.println(Input);
+       Serial.write((uint8_t)Input);
 #endif
     }
     // display update
@@ -505,6 +501,7 @@ void loop(void)
       if (currentState > UIMenuEnd) {
         updateProcessDisplay();
       }
+      else displayThermocoupleData(1, tft.height()-16,  &A);
     }
 
     switch (currentState) {
@@ -513,11 +510,14 @@ void loop(void)
         if (stateChanged) {
           lastRampTicks = zeroCrossTicks;
           stateChanged = false;
-          Output = 80;
+          Output = 50;
           PID.SetMode(AUTOMATIC);
           PID.SetControllerDirection(DIRECT);
           PID.SetTunings(heaterPID.Kp, heaterPID.Ki, heaterPID.Kd);
-          Setpoint = airTemp[NUM_TEMP_READINGS - 1].temp;
+          Setpoint = Input;
+          #ifdef WITH_BEEPER
+              tone(PIN_BEEPER,BEEP_FREQ,100);
+          #endif
         }
 
         updateRampSetpoint();
@@ -710,9 +710,6 @@ bool firstRun() {
 #endif
   return true;
 }
-
-
-
 
 
 // ------
