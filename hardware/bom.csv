@@ -16,10 +16,10 @@ R4,R_Axial_DIN0414_L11.9mm_D4.5mm_P5.08mm_Vertical,1,100R 1/2w
 OC1,DIP-6_W7.62mm,1,H11AA1
 JP1,Pin_Header_Straight_1x02_Pitch2.54mm,1,Jumper
 J10,Pin_Header_Straight_1x17_Pitch2.54mm,1,CONN_01X17
-D1,D_A-405_P5.08mm_Vertical_AnodeUp,1,D_Small
+D1,D_A-405_P5.08mm_Vertical_AnodeUp,1,1N4001
 R8,R_Axial_DIN0309_L9.0mm_D3.2mm_P12.70mm_Horizontal,1,4K7
 JP2,Pin_Header_Straight_1x03_Pitch2.54mm,1,SPI_VCC_selector
-"D2,D3",D_SOD-123,2,D_Small
+"D2,D3",D_SOD-123,2,1N4148
 "J8,J5,J6,J7",Pin_Header_Straight_1x03_Pitch2.54mm,4,CONN_01X03
 "R1,R2",R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal,2,47k 1/4w
 C2,C_Rect_L19.0mm_W5.0mm_P15.00mm_MKS4,1,100n
