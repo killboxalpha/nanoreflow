@@ -7,7 +7,7 @@ Q1,TO-220_Vertical,1,IRF540N
 C1,C_Disc_D5.0mm_W2.5mm_P2.50mm,1,100n
 R3,R_1206_HandSoldering,1,120R
 R5,R_1206_HandSoldering,1,100K
-K1,SIP4_Sharp-SSR_Pitch7.62mm_Straight,1,S202S02
+K1,SIP4_Sharp-SSR_Pitch7.62mm_Straight,1,S202S01
 J1,TerminalBlock_Pheonix_MKDS1.5-2pol,1,AC IN 220v
 J2,TerminalBlock_Pheonix_MKDS1.5-2pol,1,HEATER
 J3,TerminalBlock_Pheonix_MKDS1.5-2pol,1,DC IN 12V

@@ -15,7 +15,7 @@ Reflow Oven Controller
 * solely controlled using a cheap rotary encoder and its single button
 * stores up to 30 temperature profiles in EEPROM
 * configurable PID-parameters
-* simple, small hardware to drive loads up to 600V and up to 8A
+* simple, small hardware to drive loads up to 600V and up to 2A without heatsink
 * hardware can
   * measure two temperatures independently
   * drive two AC loads, such as heater and fan
