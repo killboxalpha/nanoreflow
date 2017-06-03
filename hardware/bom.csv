@@ -1,5 +1,5 @@
-"Id";"Part";"Package";"Quantity";"Description";"Reference";
-1;"ARDUINO_NANO1";"Arduino_Nano_Header";1;"arduino_nano_header";;;
+"Id";"Identificador";"Empaquetado";"Cantidad";"Identificación";"Suministrador y ref";
+1;"ARDUINO_NANO1";"arduino_nano_header";1;"arduino_nano_header";;;
 2;"C4";"C_1206_HandSoldering";1;"100n";;;
 3;"R6,R7";"R_1206_HandSoldering";2;"10k";;;
 4;"HOLE4,HOLE1,HOLE2,HOLE3";"MountingHole_3.2mm_M3_Pad_Via";4;"MountingHole_3.2mm_M3_Pad_Via";;;
@@ -25,4 +25,3 @@
 24;"R1,R2";"R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal";2;"47k 1/4w";;;
 25;"C2";"C_Rect_L19.0mm_W5.0mm_P15.00mm_MKS4";1;"100n";;;
 26;"J4";"Pin_Header_Straight_2x01_Pitch2.54mm";1;"12v FAN";;;
-
