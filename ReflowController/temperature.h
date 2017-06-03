@@ -10,7 +10,7 @@
 #define MAX_VALID_TEMP_MAX6675 400
 #endif
 
-#define TEMP_READ_ERROR 10
+#define TEMP_READ_ERROR 0x0A
 
 typedef union {
   uint32_t value;
@@ -80,7 +80,7 @@ void readThermocouple(struct Thermocouple* input) {
   input->stat = sensor.bytes[0] & 0b111;
 
   uint16_t value = (sensor.value >> 18) & 0x3FFF; // mask off the sign bit and shit to the correct alignment for the temp data  
-  input->temperature = value * 0.25;
+  input->temperature = value * 0.25*TEMP_COMPENSATION;
 
 #else ifdef SENSOR_MAX6675
   sensor.bytes[3] = 0;
@@ -91,9 +91,11 @@ void readThermocouple(struct Thermocouple* input) {
     input->stat = TEMP_READ_ERROR;
     }
   else {
-    sensor.value >>= 3;
-    double temp = sensor.value *0.25;
-    // got wrong readings of the MAX6675 with value 1
+    
+    uint16_t value = (sensor.value >> 3) & 0x0FFF; // mask off the sign bit and shit to the correct alignment for the temp data  
+    
+    double temp = value *0.25*TEMP_COMPENSATION;
+    // discard wrong readings of the MAX6675
     if ((temp > MIN_VALID_TEMP_MAX6675) && (temp < MAX_VALID_TEMP_MAX6675)) {
       input->temperature = temp;
       input->stat = 0;
