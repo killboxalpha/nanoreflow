@@ -22,7 +22,7 @@ enum
 };
 
 //#define ST7735_CHIPSET    ST7735_INITR_18REDTAB // <= Set ST7735 LCD chipset/variation here (from above list)
-#define ST7735_CHIPSET    ST7735_INITR_144GREENTAB
+#define ST7735_CHIPSET    ST7735_INITR_REDTAB
 // NOTE: These are typical hookups individual boards will vary, please check your documentation.
 // CAUTION: While Adafruit boards generally always come with needed level-converters, I find many
 //          other LCD displays advertised as supporting 5V only support 5V power (with a regulator).
