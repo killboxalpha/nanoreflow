@@ -1,115 +1,188 @@
-#ifndef TEMPERATURE_H
-#define TEMPERATURE_H
+#ifndef HELPERS_H
+#define HELPERS_H
+
+// ----------------------------------------------------------------------------
 
 #include <Arduino.h>
-#include <SPI.h>
-#include "config.h"
-
-#ifdef SENSOR_MAX6675
-#define MIN_VALID_TEMP_MAX6675 10
-#define MAX_VALID_TEMP_MAX6675 400
-#endif
-
-#define TEMP_READ_ERROR 0x0A
-
-typedef union {
-  uint32_t value;
-  uint8_t bytes[4];
-  struct {
-    uint8_t b31:1;
-    uint8_t b30:1;
-    uint8_t b29:1;
-    uint8_t b28:1;
-    uint8_t b27:1;
-    uint8_t b26:1;
-    uint8_t b25:1;
-    uint8_t b24:1;
-    uint8_t b23:1;
-    uint8_t b22:1;
-    uint8_t b21:1;
-    uint8_t b20:1;
-    uint8_t b19:1;
-    uint8_t b18:1;
-    uint8_t Reserved2:1;
-    uint8_t Fault:1;
-    uint8_t b15:1;
-    uint8_t b14:1;
-    uint8_t b13:1;
-    uint8_t b12:1;
-    uint8_t b11:1;
-    uint8_t b10:1;
-    uint8_t b9:1;
-    uint8_t b8:1;
-    uint8_t b7:1;
-    uint8_t b6:1;
-    uint8_t b5:1;
-    uint8_t b4:1;
-    uint8_t Reserved1:1;
-    uint8_t FaultShortSupply:1;
-    uint8_t FaultShortGround:1;
-    uint8_t FaultOpen:1;
-  };
-} __attribute__((packed)) MAXSENSOR_t;
 
 
+// ----------------------------------------------------------------------------
+// 
 
-MAXSENSOR_t sensor;
-
-typedef struct Thermocouple {
-  double temperature;
-  uint8_t stat;
-  uint8_t chipSelect;
+class ScopedTimer {
+public:
+  ScopedTimer(const char * Label)
+    : label(Label), ts(millis())
+  {
+  }
+  ~ScopedTimer() {
+    Serial.print(label); Serial.print(": ");
+    Serial.println(millis() - ts);
+  }
+private:
+  const char *label;
+  const unsigned long ts;
 };
 
+// ----------------------------------------------------------------------------
 
-void readThermocouple(struct Thermocouple* input) {
-  
-
-  uint8_t lcdState = digitalRead(LCD_CS);
-  digitalWrite(LCD_CS, HIGH);
-  digitalWrite(input->chipSelect, LOW);
-  delay(1);
-
-  
-#ifdef SENSOR_MAX31855
-  
-  for (int8_t i = 3; i >= 0; i--) {
-    sensor.bytes[i] = SPI.transfer(0x00);
-  }
-
-  input->stat = sensor.bytes[0] & 0b111;
-
-  uint16_t value = (sensor.value >> 18) & 0x3FFF; // mask off the sign bit and shit to the correct alignment for the temp data  
-  input->temperature = value * 0.25*TEMP_COMPENSATION;
-
-#else ifdef SENSOR_MAX6675
-  sensor.bytes[3] = 0;
-  sensor.bytes[2] = 0;
-  sensor.bytes[1] = SPI.transfer(0x00);
-  sensor.bytes[0] = SPI.transfer(0x00);
-  if (sensor.value & 0x4) {
-    input->stat = TEMP_READ_ERROR;
-    }
-  else {
-    
-    uint16_t value = (sensor.value >> 3) & 0x0FFF; // mask off the sign bit and shit to the correct alignment for the temp data  
-    
-    double temp = value *0.25*TEMP_COMPENSATION;
-    // discard wrong readings of the MAX6675
-    if ((temp > MIN_VALID_TEMP_MAX6675) && (temp < MAX_VALID_TEMP_MAX6675)) {
-      input->temperature = temp;
-      input->stat = 0;
-    }
-    else input->stat = TEMP_READ_ERROR;
-  }
-
-#endif
-
-  digitalWrite(input->chipSelect, HIGH); 
-
-  digitalWrite(LCD_CS, lcdState);
-
+template<typename T> inline const T labs(T const& x) {
+    return (x < 0) ? -x : x;
 }
 
+// ----------------------------------------------------------------------------
 
-#endif
+long lpow(int base, int exponent) {
+  long result = 1;
+  while (exponent) {
+    if (exponent & 1) {
+      result *= base;
+    }
+    exponent >>= 1;
+    base *= base;
+  }
+  return result;
+}
+
+//double round(double x) {
+//    return (x >= 0.0) ? floor(x + 0.5) : ceil(x - 0.5);
+//}
+
+// ----------------------------------------------------------------------------
+
+void itoa10(int32_t n, char *result, bool preventMinus = false) {
+  uint32_t u;
+  uint16_t i = 0;
+
+  if (n < 0) { // for negative number, prepend '-' and invert
+    if (!preventMinus) {
+      result[0] = '-';
+      result++;    
+    }
+    u = ((uint32_t) -(n + 1)) + 1;
+  }
+  else { 
+    u = (uint32_t)n;
+  }
+  
+  do {
+    result[i++] = '0' + u % 10;
+    u /= 10;
+  } 
+  while (u > 0);
+  
+  // rotate string bytewise
+  for (uint16_t j = 0; j < i / 2; ++j) {
+    char tmp = result[j];
+    result[j] = result[i - j - 1];
+    result[i - j - 1] = tmp;
+  }
+  result[i] = '\0';
+}
+
+// ----------------------------------------------------------------------------
+
+uint8_t countDigits(uint32_t n) {
+  uint8_t d = 1;
+  switch (n) {
+    case  100000000 ... 999999999:  d++;
+    case   10000000 ... 99999999:   d++;
+    case    1000000 ... 9999999:    d++;
+    case     100000 ... 999999:     d++;
+    case      10000 ... 99999:      d++;
+    case       1000 ... 9999:       d++;
+    case        100 ... 999:        d++;
+    case         10 ... 99:         d++;
+  }
+  return d;
+}
+
+// ----------------------------------------------------------------------------
+
+void ftoa(char *buf, float val, int places) {
+  if (signbit(val)) *buf++ = '-';
+
+  int32_t digit = (int32_t)(val);
+  const int32_t precision = lpow(10, places);
+  int32_t decimal = lround((val - digit) * precision);
+
+  if (labs(decimal) == precision) {
+    signbit(val) ? digit-- : digit++;
+    decimal = 0;
+  }
+
+  itoa10(labs(digit), buf);
+  while (*buf != '\0') buf++;
+  *buf++ = '.';
+
+  if (decimal) {
+    int32_t tmp = labs(decimal) * 10;
+    while (tmp < precision) {
+      *buf++ = '0';
+      tmp *= 10;
+    }
+  }
+
+  itoa10(labs(decimal), buf);
+  if (decimal == 0) {
+    while (places--) *buf++ = '0';
+    *buf = '\0';
+  }
+}
+
+// ----------------------------------------------------------------------------
+
+void itostr(char *r, int16_t val, char *unit = NULL) {
+  char *p = r, *u = unit;
+  itoa10(val, p);
+  while(*p != 0x00) p++;
+  while(*u != 0x00) *p++ = *u++;
+  *p = '\0';
+}
+
+// ---------------------------------------------------------------------------- 
+// crc8
+//
+// Copyright (c) 2002 Colin O'Flynn
+// Minor changes by M.Thomas 9/2004 
+// ----------------------------------------------------------------------------
+
+#define CRC8INIT    0x00
+#define CRC8POLY    0x18              //0X18 = X^8+X^5+X^4+X^0
+
+// ----------------------------------------------------------------------------
+
+uint8_t crc8(uint8_t *data, uint16_t data_length) {
+  uint8_t  b;
+  uint8_t  bit_counter;
+  uint8_t  crc = CRC8INIT;
+  uint8_t  feedback_bit;
+  uint16_t loop_count;
+  
+  for (loop_count = 0; loop_count != data_length; loop_count++) {
+    b = data[loop_count];
+    bit_counter = 8;
+
+    do {
+      feedback_bit = (crc ^ b) & 0x01;
+
+      if (feedback_bit == 0x01) {
+        crc = crc ^ CRC8POLY;
+      }
+
+      crc = (crc >> 1) & 0x7F;
+
+      if (feedback_bit == 0x01) {
+        crc = crc | 0x80;
+      }
+
+      b = b >> 1;
+      bit_counter--;
+
+    } while (bit_counter > 0);
+  }
+  
+  return crc;
+}
+
+#endif // HELPERS_H
