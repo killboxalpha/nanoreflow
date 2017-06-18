@@ -31,6 +31,7 @@
 // ----------------------------------------------------------------------------
 volatile uint32_t timerTicks     = 0;
 volatile uint8_t  phaseCounter   = 0;
+#define TIMER1_PERIOD_US 100
 // ----------------------------------------------------------------------------
 
 
@@ -315,7 +316,7 @@ void setup() {
   currentState = Settings;
   menuUpdateRequest = true;
 
-  Timer1.initialize(100);
+  Timer1.initialize(TIMER1_PERIOD_US);
   Timer1.attachInterrupt(timerIsr);
 
   attachInterrupt(INT_ZX, zeroCrossingIsr, RISING);
