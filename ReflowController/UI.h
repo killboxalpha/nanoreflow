@@ -56,7 +56,7 @@ int16_t encLastAbsolute = -1;
 
 // ------------ 
 
-float pxPer10S;
+float pxPerSec;
 float pxPerC;
 uint16_t xOffset; // used for wraparound on x axis
 
@@ -607,10 +607,61 @@ MenuItem(miPidSettings,  "PID Settings",  miFactoryReset, miFanSettings, miExit,
 MenuItem(miFactoryReset, "Factory Reset", Menu::NullItem, miPidSettings, miExit, Menu::NullItem, menu_factoryReset);
 
 // ----------------------------------------------------------------------------
+void drawInitialProcessDisplay()
+{
+    const uint8_t h =  tft.height()-42;
+  const uint8_t w = tft.width()-24;
+  const uint8_t yOffset =  30; // space not available for graph  
+    double tmp;
+ initialProcessDisplay = true;
 
+    tft.fillScreen(ST7735_WHITE);
+    tft.fillRect(0, 0, tft.width(), menuItemHeight, ST7735_BLUE);
+    tft.setCursor(1, 2);
+#ifndef PIDTUNE
+    tft.print("Profile ");
+    tft.print(activeProfileId);
+#else
+    tft.print("Tuning ");
+#endif
+
+    tmp = h / (activeProfile.peakTemp * TEMPERATURE_WINDOW) * 100.0;
+    pxPerC = tmp;
+    
+    double estimatedTotalTime = 0;//60 * 12;
+    // estimate total run time for current profile
+    estimatedTotalTime = activeProfile.soakDuration + activeProfile.peakDuration;
+    estimatedTotalTime += (activeProfile.peakTemp - A.temperature)/(float)activeProfile.rampUpRate;
+    estimatedTotalTime += (activeProfile.peakTemp - A.temperature)/(float)activeProfile.rampDownRate;
+    estimatedTotalTime *= 1.1; // add some spare
+    
+    tmp = w / estimatedTotalTime ; 
+    pxPerSec = (float)tmp;
+   
+#ifdef SERIAL_VERBOSE
+ Serial.print("estimatedTotalTime: ");
+    Serial.println(estimatedTotalTime);
+    Serial.print("pxPerSec: ");
+    Serial.println(pxPerSec);
+    Serial.print("Calc pxPerC/S: ");
+    Serial.println(pxPerC);
+    Serial.print("/");
+    Serial.println(pxPerSec);
+#endif   
+    // 50°C grid
+    int16_t t = (uint16_t)(activeProfile.peakTemp * TEMPERATURE_WINDOW);
+    tft.setTextColor(tft.Color565(0xa0, 0xa0, 0xa0));
+    tft.setTextSize(1);
+    for (uint16_t tg = 0; tg < t; tg += 50) {
+      uint16_t l = h - (tg * pxPerC / 100) + yOffset;
+      tft.drawFastHLine(0, l, tft.width(), tft.Color565(0xe0, 0xe0, 0xe0));
+      tft.setCursor(tft.width()-24, l-7);
+      alignRightPrefix((int)tg); 
+      tft.print((int)tg);
+      tft.print("\367");
+    }
+}
 // ----------------------------------------------------------------------------
-
-
 void updateProcessDisplay() {
   const uint8_t h =  tft.height()-42;
   const uint8_t w = tft.width()-24;
@@ -625,71 +676,11 @@ void updateProcessDisplay() {
   tft.setTextSize(1);
 
   if (!initialProcessDisplay) {
-    initialProcessDisplay = true;
-
-    tft.fillScreen(ST7735_WHITE);
-    tft.fillRect(0, 0, tft.width(), menuItemHeight, ST7735_BLUE);
-    tft.setCursor(1, y);
-#ifndef PIDTUNE
-    tft.print("Profile ");
-    tft.print(activeProfileId);
-#else
-    tft.print("Tuning ");
-#endif
-
-    tmp = h / (activeProfile.peakTemp * TEMPERATURE_WINDOW) * 100.0;
-    pxPerC = tmp;
-    
-    
-    double estimatedTotalTime = 0;//60 * 12;
-    // estimate total run time for current profile
-    estimatedTotalTime = activeProfile.soakDuration + activeProfile.peakDuration;
-    estimatedTotalTime += (activeProfile.peakTemp - A.temperature)/(float)activeProfile.rampUpRate;
-    estimatedTotalTime += (activeProfile.peakTemp - A.temperature)/(float)activeProfile.rampDownRate;
-    estimatedTotalTime *= 1.1; // add some spare
-    
-    tmp = w / estimatedTotalTime ; 
-    pxPer10S = (float)tmp;
-   
-#ifdef SERIAL_VERBOSE
- Serial.print("estimatedTotalTime: ");
-    Serial.println(estimatedTotalTime);
-    Serial.print("pxPer10S: ");
-    Serial.println(pxPer10S);
-    Serial.print("Calc pxPerC/S: ");
-    Serial.println(pxPerC);
-    Serial.print("/");
-    Serial.println(pxPer10S);
-#endif   
-    // 50°C grid
-    int16_t t = (uint16_t)(activeProfile.peakTemp * TEMPERATURE_WINDOW);
-    tft.setTextColor(tft.Color565(0xa0, 0xa0, 0xa0));
-    tft.setTextSize(1);
-    for (uint16_t tg = 0; tg < t; tg += 50) {
-      uint16_t l = h - (tg * pxPerC / 100) + yOffset;
-      tft.drawFastHLine(0, l, tft.width(), tft.Color565(0xe0, 0xe0, 0xe0));
-      tft.setCursor(tft.width()-24, l-7);
-      alignRightPrefix((int)tg); 
-      tft.print((int)tg);
-      tft.print("\367");
-      
-    }
-    
-    // profile preview in gray
- /*   uint8_t j = 0;
-    float sec_j = 0;
-    for (uint8_t i = 0; i < tft.width(); i ++) {
-      sec_j = i / pxPer10S;
-      if (sec_j < activeProfile.rampUpRate
-      dy = h - ((uint16_t)Setpoint * pxPerC / 100) + yOffset;
-      tft.drawPixel(dx, dy, ST7735_BLUE);
-    }
-   */ 
-
+    drawInitialProcessDisplay();
   }
 
   // elapsed time
-  uint16_t elapsed = (zeroCrossTicks - startCycleZeroCrossTicks) / (HERZS *2);
+  uint16_t elapsed = (zeroCrossTicks - startCycleZeroCrossTicks) / (float)(TICKS_PER_SEC);
   tft.setCursor(tft.width()-35, y);
   alignRightPrefix(elapsed); 
   tft.print(elapsed);
@@ -740,7 +731,7 @@ void updateProcessDisplay() {
 
   do { // x with wrap around
     
-    dx = (uint16_t)((elapsed - xOffset) * pxPer10S);
+    dx = (uint16_t)((elapsed - xOffset) * pxPerSec);
     if (dx > w) {
       xOffset = elapsed;
     }

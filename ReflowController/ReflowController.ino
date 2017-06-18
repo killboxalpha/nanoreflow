@@ -476,7 +476,7 @@ void loop(void)
           collectTicks += airTemp[i].ticks;
         }
         float tempDiff = (airTemp[NUM_TEMP_READINGS - 1].temp - airTemp[0].temp);
-        float timeDiff = collectTicks / (float)(HERZS *2.0);
+        float timeDiff = collectTicks / (float)(TICKS_PER_SEC);
         
         rampRate = tempDiff / timeDiff;
      
@@ -487,7 +487,7 @@ void loop(void)
 #endif
     }
     // display update
-    if (zeroCrossTicks - lastDisplayUpdate > TICKS_TO_REDRAW) {
+    if (zeroCrossTicks - lastDisplayUpdate >= TICKS_TO_REDRAW) {
       lastDisplayUpdate = zeroCrossTicks;
       if (currentState > UIMenuEnd) {
         updateProcessDisplay();
