@@ -65,9 +65,9 @@ typedef struct Thermocouple {
 void readThermocouple(struct Thermocouple* input) {
   
 
-  uint8_t lcdState = digitalRead(LCD_CS);
-  digitalWrite(LCD_CS, HIGH);
-  digitalWrite(input->chipSelect, LOW);
+  uint8_t lcdState = digitalState(PIN_LCD_CS);
+  digitalHigh(PIN_LCD_CS);
+  digitalLow(input->chipSelect);
   delay(1);
 
   
@@ -105,9 +105,10 @@ void readThermocouple(struct Thermocouple* input) {
 
 #endif
 
-  digitalWrite(input->chipSelect, HIGH); 
+  digitalHigh(input->chipSelect); 
 
-  digitalWrite(LCD_CS, lcdState);
+  if (lcdState == 0) digitalLow(PIN_LCD_CS);
+  else digitalHigh(PIN_LCD_CS);
 
 }
 

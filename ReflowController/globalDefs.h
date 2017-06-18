@@ -5,16 +5,19 @@
 
 
 #ifdef MAINS_50HZ 
-  #define DEFAULT_LOOP_DELAY 89 // should be about 16% less for 60Hz mains
-  #define MS_PER_SINE 100 // for 50Hz mains; 100ms per sinusoid
-  #define HERZS 50
+  static const uint8_t DEFAULT_LOOP_DELAY = 89; // should be about 16% less for 60Hz mains
+  static const uint8_t TICKS_PER_SEC = 100; // for 50Hz mains:  2*50Hz = 100 ticks per second
+  static const uint8_t HERZS = 50;
 #else ifdef MAINS_60HZ
-  #define DEFAULT_LOOP_DELAY 74 // 60Hz mains = 74?
-  #define MS_PER_SINE 83 // for 60Hz Mains; 83,3333ms per sinusoid
-  #define HERZS 60
+  static const uint8_t  DEFAULT_LOOP_DELAY = 74; // 60Hz mains = 74?
+  static const uint8_t TICKS_PER_SEC = 120; // for 60Hz mains:  2*60Hz = 120 ticks per second
+  static const uint8_t  HERZS = 60;
 #endif
 
-const char * ver = "3.1";
+static const uint8_t TICKS_PER_UPDATE = 25; // for 60Hz mains:  2*60Hz = 120 ticks per second
+static const uint8_t TICKS_TO_REDRAW = 50; // for 60Hz mains:  2*60Hz = 120 ticks per second
+
+const char * ver = "3.2";
 
 
 // ----------------------------------

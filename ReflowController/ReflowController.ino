@@ -9,9 +9,9 @@
 #include <EEPROM.h>
 #include <PID_v1.h>
 #include <SPI.h>
-#include <PDQ_GFX.h>        // PDQ: Core graphics library
-#include "PDQ_ST7735_config.h"      // PDQ: ST7735 pins and other setup for this sketch
-#include <PDQ_ST7735.h>     // PDQ: Hardware-specific driver library
+#include <PDQ_GFX.h>             // PDQ: Core graphics library
+#include "PDQ_ST7735_config.h"   // PDQ: ST7735 pins and other setup for this sketch
+#include <PDQ_ST7735.h>          // PDQ: Hardware-specific driver library
 #include <Menu.h>
 #include <ClickEncoder.h>
 #include <TimerOne.h>
@@ -26,24 +26,15 @@
 #include <PID_AutoTune_v0.h>
 #endif
 // ----------------------------------------------------------------------------
-
-
+volatile uint32_t    timerTicks       = 0;
+volatile uint8_t     phaseCounter     = 0;
+static const uint8_t TIMER1_PERIOD_US = 100;
 // ----------------------------------------------------------------------------
-volatile uint32_t timerTicks     = 0;
-volatile uint8_t  phaseCounter   = 0;
-static const uint8_t TIMER1_PERIOD_US    = 100;
-// ----------------------------------------------------------------------------
-
-
-
-// ----------------------------------------------------------------------------
-
-uint32_t lastUpdate = 0;
+uint32_t lastUpdate        = 0;
 uint32_t lastDisplayUpdate = 0;
-State previousState = Idle;
-bool stateChanged = false;
+State    previousState     = Idle;
+bool     stateChanged      = false;
 uint32_t stateChangedTicks = 0;
-
 // ----------------------------------------------------------------------------
 // PID
 
@@ -86,19 +77,16 @@ uint8_t thermocoupleErrorCount;
 //
 void setupPins(void) {
 
-//DDRD |= ((1 << PIN_HEATER) | (1 << PIN_FAN)); // Output
-//PORTD |= (1 << PIN_HEATER) | (1 << PIN_FAN); // off
-pinMode(PIN_HEATER, OUTPUT);
-digitalHigh(PIN_HEATER);
-pinMode(PIN_FAN, OUTPUT);
+pinAsOutput(PIN_HEATER);
+digitalHigh(PIN_HEATER); // off
+pinAsOutput(PIN_FAN);
 digitalHigh(PIN_FAN);
-pinMode(PIN_ZX, INPUT_PULLUP);
-//DDRD &= ~((1 << PIN_ZX)); // input
-pinMode(PIN_TC_CS, OUTPUT);
-pinMode(LCD_CS, OUTPUT);
-pinMode(A.chipSelect, OUTPUT);
+pinAsInputPullUp(PIN_ZX);
+pinAsOutput(PIN_TC_CS);
+pinAsOutput(PIN_LCD_CS);
+pinAsOutput(A.chipSelect);
 #ifdef WITH_BEEPER
-    pinMode(PIN_BEEPER, OUTPUT);
+    pinAsOutput(PIN_BEEPER);
 #endif
 
 }
@@ -106,7 +94,9 @@ pinMode(A.chipSelect, OUTPUT);
 void killRelayPins(void) {
 Timer1.stop();
 detachInterrupt(INT_ZX);
-PORTD |= (1 << PIN_HEATER) | (1 << PIN_FAN); // off
+digitalHigh(PIN_FAN);
+digitalHigh(PIN_HEATER);
+//PORTD |= (1 << PIN_HEATER) | (1 << PIN_FAN); // off
 }
 
 // ----------------------------------------------------------------------------
@@ -194,10 +184,10 @@ void timerIsr(void) { // ticks with 100µS
   }
 
   if (phaseCounter > Channels[CHANNEL_FAN].target) {
-    PORTD &= ~(1 << Channels[CHANNEL_FAN].pin);
+    digitalLow(Channels[CHANNEL_FAN].pin); //PORTD &= ~(1 << Channels[CHANNEL_FAN].pin);
   }
   else {
-    PORTD |=  (1 << Channels[CHANNEL_FAN].pin);
+    digitalHigh(Channels[CHANNEL_FAN].pin);//PORTD |=  (1 << Channels[CHANNEL_FAN].pin);
   }
 
   // wave packet control for heater
@@ -327,17 +317,17 @@ uint32_t lastRampTicks;
 uint32_t lastSoakTicks;
 
 void updateRampSetpoint(bool down = false) {
-  if (zeroCrossTicks > lastRampTicks + MS_PER_SINE) {
+  if (zeroCrossTicks > lastRampTicks + TICKS_PER_UPDATE) {
     double rate = (down) ? activeProfile.rampDownRate : activeProfile.rampUpRate;
-    Setpoint += (rate / MS_PER_SINE * (zeroCrossTicks - lastRampTicks)) * ((down) ? -1 : 1);
+    Setpoint += (rate / (float)TICKS_PER_SEC * (zeroCrossTicks - lastRampTicks)) * ((down) ? -1 : 1);
     lastRampTicks = zeroCrossTicks;
   }
 }
 
 void updateSoakSetpoint(bool down = false) {
-  if (zeroCrossTicks > lastSoakTicks + MS_PER_SINE) {
+  if (zeroCrossTicks > lastSoakTicks + TICKS_PER_UPDATE) {
     double rate = (activeProfile.soakTempB-activeProfile.soakTempA)/(float)activeProfile.soakDuration;
-    Setpoint += (rate / MS_PER_SINE * (zeroCrossTicks - lastSoakTicks)) * ((down) ? -1 : 1);
+    Setpoint += (rate / (float)TICKS_PER_SEC * (zeroCrossTicks - lastSoakTicks)) * ((down) ? -1 : 1);
     lastSoakTicks = zeroCrossTicks;
   }
 }
@@ -442,7 +432,7 @@ void loop(void)
 
   // --------------------------------------------------------------------------
 
-  if (zeroCrossTicks - lastUpdate >= TICKS_TO_UPDATE) {
+  if (zeroCrossTicks - lastUpdate >= TICKS_PER_UPDATE) {
     uint32_t deltaT = zeroCrossTicks - lastUpdate;
     lastUpdate = zeroCrossTicks;
 
@@ -537,7 +527,7 @@ void loop(void)
 
         updateSoakSetpoint();
 
-        if (zeroCrossTicks - stateChangedTicks >= (uint32_t)activeProfile.soakDuration * MS_PER_SINE) {
+        if (zeroCrossTicks - stateChangedTicks >= (uint32_t)activeProfile.soakDuration * TICKS_PER_SEC) {
           currentState = RampUp;
         }
         break;
@@ -562,7 +552,7 @@ void loop(void)
           Setpoint = activeProfile.peakTemp;
         }
 
-        if (zeroCrossTicks - stateChangedTicks >= (uint32_t)activeProfile.peakDuration * MS_PER_SINE) {
+        if (zeroCrossTicks - stateChangedTicks >= (uint32_t)activeProfile.peakDuration * TICKS_PER_SEC) {
           currentState = RampDown;
         }
         break;

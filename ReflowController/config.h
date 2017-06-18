@@ -27,44 +27,42 @@
 #define WITH_SPLASH 1
 
 
-#define LCD_CS   10
-#define LCD_DC   9
-#define LCD_RST  8
+static const uint8_t PIN_LCD_CS   = 10;
+static const uint8_t PIN_LCD_DC   = 9;
+static const uint8_t PIN_LCD_RST  = 8;
+static const uint8_t LCD_ROTATION = 3; // 0/2-> portrait, 1/3-> landscape
 
-#define LCD_ROTATION 3 // 0/2-> portrait, 1/3-> landscape
-
-#define PIN_TC_CS  A1
-#define PIN_HEATER   3 // SSR for the heater
-#define PIN_FAN      A0 // SSR for the fan
-#define PIN_BEEPER   A5 // Beeper Out
+static const uint8_t PIN_TC_CS  = A1;
+static const uint8_t PIN_HEATER = 3; // SSR for the heater
+static const uint8_t PIN_FAN    = A0; // SSR for the fan
+static const uint8_t PIN_BEEPER = A5; // Beeper Out
 // --- encoder
-#define PIN_ENC_A   A2 // 
-#define PIN_ENC_B   A3 // 
-#define PIN_ENC_BTN A4 // 
-#define ENC_STEPS_PER_NOTCH 4
-#define IS_ENC_ACTIVE false // encoder module actively fed with VCC ( seems to works bad if set to true )
+static const uint8_t PIN_ENC_A           = A2; // 
+static const uint8_t PIN_ENC_B           = A3; // 
+static const uint8_t PIN_ENC_BTN         = A4; // 
+static const uint8_t ENC_STEPS_PER_NOTCH = 4;
+static const boolean IS_ENC_ACTIVE       = false; // encoder module actively fed with VCC ( seems to works bad if set to true )
 
-#define BEEP_FREQ 1976 // B6 note
+static const uint16_t BEEP_FREQ = 1976; // B6 note
 
-#define PIN_ZX       2 // pin for zero crossing detector
-#define INT_ZX       digitalPinToInterrupt(PIN_ZX) // interrupt for zero crossing detector
+static const uint8_t PIN_ZX = 2; // pin for zero crossing detector
+static const uint8_t INT_ZX = digitalPinToInterrupt(PIN_ZX); // interrupt for zero crossing detector
 
-#define NUM_TEMP_READINGS 5
-#define TC_ERROR_TOLERANCE 5 // allow for n consecutive errors due to noisy power supply before bailing out
-#define TEMP_COMPENSATION 1.0 // correction factor to match temperature measured with other device
+static const uint8_t NUM_TEMP_READINGS  = 5;
+static const uint8_t TC_ERROR_TOLERANCE = 5; // allow for n consecutive errors due to noisy power supply before bailing out
+static const float   TEMP_COMPENSATION  = 1.0; // correction factor to match temperature measured with other device
 
-#define TICKS_TO_UPDATE 30
-#define TICKS_TO_REDRAW TICKS_TO_UPDATE*2
+
 
 // see: https://www.compuphase.com/electronics/reflowsolderprofiles.htm  
-#define DEFAULT_SOAK_TEPM_A 110
-#define DEFAULT_SOAK_TEPM_B 160 
-#define DEFAULT_SOAK_DURATION 180 
-#define DEFAULT_PEAK_TEPM 200
-#define DEFAULT_PEAK_DURATION 15
-#define DEFAULT_RAMP_UP_RATE 1.2 // degrees / second (keep it about 1/2 of maximum to prevent PID overshooting)
-#define DEFAULT_RAMP_DOWN_RATE 2.0 // degrees / second
-#define FACTORY_FAN_ASSIST_SPEED 33
+static const uint8_t DEFAULT_SOAK_TEPM_A      = 110;
+static const uint8_t DEFAULT_SOAK_TEPM_B      = 160; 
+static const uint8_t DEFAULT_SOAK_DURATION    = 180; 
+static const uint8_t DEFAULT_PEAK_TEPM        = 200;
+static const uint8_t DEFAULT_PEAK_DURATION    = 15;
+static const float DEFAULT_RAMP_UP_RATE       = 1.2; // degrees / second (keep it about 1/2 of maximum to prevent PID overshooting)
+static const float DEFAULT_RAMP_DOWN_RATE     = 2.0; // degrees / second
+static const uint8_t FACTORY_FAN_ASSIST_SPEED = 33;
 
 
 /*
