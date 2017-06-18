@@ -15,8 +15,8 @@
 #include <Menu.h>
 #include <ClickEncoder.h>
 #include <TimerOne.h>
-#include <digitalWriteFast.h>
 
+#include "portMacros.h"
 #include "temperature.h"
 #include "helpers.h"
 #include "UI.h"
@@ -31,7 +31,7 @@
 // ----------------------------------------------------------------------------
 volatile uint32_t timerTicks     = 0;
 volatile uint8_t  phaseCounter   = 0;
-#define TIMER1_PERIOD_US 100
+static const uint8_t TIMER1_PERIOD_US    = 100;
 // ----------------------------------------------------------------------------
 
 
@@ -89,9 +89,9 @@ void setupPins(void) {
 //DDRD |= ((1 << PIN_HEATER) | (1 << PIN_FAN)); // Output
 //PORTD |= (1 << PIN_HEATER) | (1 << PIN_FAN); // off
 pinMode(PIN_HEATER, OUTPUT);
-digitalWriteFast(PIN_HEATER, HIGH);
+digitalHigh(PIN_HEATER);
 pinMode(PIN_FAN, OUTPUT);
-digitalWriteFast(PIN_FAN, HIGH);
+digitalHigh(PIN_FAN);
 pinMode(PIN_ZX, INPUT_PULLUP);
 //DDRD &= ~((1 << PIN_ZX)); // input
 pinMode(PIN_TC_CS, OUTPUT);
@@ -204,8 +204,8 @@ void timerIsr(void) { // ticks with 100µS
   if (Channels[CHANNEL_HEATER].next > lastTicks // FIXME: this looses ticks when overflowing
       && timerTicks > Channels[CHANNEL_HEATER].next) 
   {
-    if (Channels[CHANNEL_HEATER].action) digitalWriteFast(Channels[CHANNEL_HEATER].pin, HIGH);
-    else digitalWriteFast(Channels[CHANNEL_HEATER].pin, LOW);
+    if (Channels[CHANNEL_HEATER].action) digitalHigh(Channels[CHANNEL_HEATER].pin); //digitalWriteFast(Channels[CHANNEL_HEATER].pin, HIGH);
+    else digitalLow(Channels[CHANNEL_HEATER].pin);//digitalWriteFast(Channels[CHANNEL_HEATER].pin, LOW);
     lastTicks = timerTicks;
   }
 
