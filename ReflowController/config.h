@@ -3,10 +3,6 @@
 
 
 
-#define SENSOR_MAX6675
-//#define SENSOR_MAX31855
-
-
 //#define ALWAYS_FIRST_RUN
 //#define FAKE_HW 1
 //#define PIDTUNE 1 // autotune wouldn't fit in the 28k available on my arduino pro micro.
