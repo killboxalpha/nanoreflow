@@ -1,26 +1,25 @@
-Identifier,Package,Quantity,Description
-ARDUINO_NANO1,arduino_nano_header,1,arduino_nano_header
-C4,C_1206_HandSoldering,1,100n
-"R6,R7",R_1206_HandSoldering,2,10k
-J9,Pin_Header_Straight_1x05_Pitch2.54mm,1,CONN_01X05
-Q1,TO-220_Vertical,1,IRF540N
-C1,C_Disc_D5.0mm_W2.5mm_P2.50mm,1,100n
-R3,R_1206_HandSoldering,1,120R
-R5,R_1206_HandSoldering,1,100K
-K1,SIP4_Sharp-SSR_Pitch7.62mm_Straight,1,S202S01
-J1,TerminalBlock_Pheonix_MKDS1.5-2pol,1,AC IN 220v
-J2,TerminalBlock_Pheonix_MKDS1.5-2pol,1,HEATER
-J3,TerminalBlock_Pheonix_MKDS1.5-2pol,1,DC IN 12V
-BZ1,Buzzer_12x9.5RM7.6,1,Buzzer
-R4,R_Axial_DIN0414_L11.9mm_D4.5mm_P5.08mm_Vertical,1,100R 1/2w
-OC1,DIP-6_W7.62mm,1,H11AA1
-JP1,Pin_Header_Straight_1x02_Pitch2.54mm,1,Jumper
-J10,Pin_Header_Straight_1x17_Pitch2.54mm,1,CONN_01X17
-D1,D_A-405_P5.08mm_Vertical_AnodeUp,1,1N4001
-R8,R_Axial_DIN0309_L9.0mm_D3.2mm_P12.70mm_Horizontal,1,4K7
-JP2,Pin_Header_Straight_1x03_Pitch2.54mm,1,SPI_VCC_selector
-"D2,D3",D_SOD-123,2,1N4148
-"J8,J5,J6,J7",Pin_Header_Straight_1x03_Pitch2.54mm,4,CONN_01X03
-"R1,R2",R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal,2,47k 1/4w
-C2,C_Rect_L19.0mm_W5.0mm_P15.00mm_MKS4,1,100n
-J4,Pin_Header_Straight_2x01_Pitch2.54mm,1,12v FAN
+Reference, Quantity, Value, Footprint
+ARDUINO_NANO1,1,arduino_nano_header,arduino_nano_header
+BZ1,1,Buzzer,Buzzer_12x9.5RM7.6
+C1,1,10n,C_Disc_D4.3mm_W1.9mm_P5.00mm
+C2,1,100n,C_1206_HandSoldering
+D1,1,1N4007,D_A-405_P5.08mm_Vertical_AnodeUp
+J1,1,AC IN 220v,TerminalBlock_Pheonix_MKDS1.5-2pol
+J10,1,CONN_01X17,Pin_Header_Straight_1x17_Pitch2.54mm
+J2,1,HEATER,TerminalBlock_Pheonix_MKDS1.5-2pol
+J3,1,DC IN 12V,TerminalBlock_Pheonix_MKDS1.5-2pol
+J4,1,12v FAN,Pin_Header_Straight_2x01_Pitch2.54mm
+"J11 J5 J6 J7 J8",5,CONN_01X03,Pin_Header_Straight_1x03_Pitch2.54mm
+J9,1,CONN_01X05,Pin_Header_Straight_1x05_Pitch2.54mm
+JP1,1,VIN enabler,Pin_Header_Straight_1x02_Pitch2.54mm
+KK1,1,TRIAC HEATSINK,SK_09_20_SA_TO_220
+OK1,1,H11AA1,DIP-6_W7.62mm_LongPads
+Q1,1,IRF540N,TO-220_Vertical
+"R1 R2",2,47k 0.6w,R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal
+R3,1,2.4k,R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal
+R4,1,180R,R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal
+R5,1,1k,R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal
+R6,1,4K7,R_Axial_DIN0309_L9.0mm_D3.2mm_P12.70mm_Horizontal
+R7,1,100K,R_1206_HandSoldering
+TRIAC1,1,BT137,TO-220_Vertical_BT137
+U1,1,MOC3020M,DIP-6_W7.62mm_LongPads
