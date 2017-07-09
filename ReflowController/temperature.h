@@ -4,108 +4,32 @@
 #include <Arduino.h>
 #include <SPI.h>
 #include "config.h"
+#include "globalDefs.h"
 
-#ifdef SENSOR_MAX6675
-#define MIN_VALID_TEMP_MAX6675 10
-#define MAX_VALID_TEMP_MAX6675 400
-#endif
+MAX6675 thermocouple(PIN_TC_CLK, PIN_TC_CS, PIN_TC_DO);
 
-#define TEMP_READ_ERROR 0x0A
-
-typedef union {
-  uint32_t value;
-  uint8_t bytes[4];
-  struct {
-    uint8_t b31:1;
-    uint8_t b30:1;
-    uint8_t b29:1;
-    uint8_t b28:1;
-    uint8_t b27:1;
-    uint8_t b26:1;
-    uint8_t b25:1;
-    uint8_t b24:1;
-    uint8_t b23:1;
-    uint8_t b22:1;
-    uint8_t b21:1;
-    uint8_t b20:1;
-    uint8_t b19:1;
-    uint8_t b18:1;
-    uint8_t Reserved2:1;
-    uint8_t Fault:1;
-    uint8_t b15:1;
-    uint8_t b14:1;
-    uint8_t b13:1;
-    uint8_t b12:1;
-    uint8_t b11:1;
-    uint8_t b10:1;
-    uint8_t b9:1;
-    uint8_t b8:1;
-    uint8_t b7:1;
-    uint8_t b6:1;
-    uint8_t b5:1;
-    uint8_t b4:1;
-    uint8_t Reserved1:1;
-    uint8_t FaultShortSupply:1;
-    uint8_t FaultShortGround:1;
-    uint8_t FaultOpen:1;
-  };
-} __attribute__((packed)) MAXSENSOR_t;
-
-
-
-MAXSENSOR_t sensor;
-
-typedef struct Thermocouple {
-  double temperature;
-  uint8_t stat;
-  uint8_t chipSelect;
-};
-
-
-void readThermocouple(struct Thermocouple* input) {
+void readThermocouple() {
   
 
   uint8_t lcdState = digitalState(PIN_LCD_CS);
   digitalHigh(PIN_LCD_CS);
-  digitalLow(input->chipSelect);
+  digitalLow(PIN_TC_CS);
   delay(1);
-
-  
-#ifdef SENSOR_MAX31855
-  
-  for (int8_t i = 3; i >= 0; i--) {
-    sensor.bytes[i] = SPI.transfer(0x00);
+  double reading = thermocouple.readCelsius();
+   
+  if (reading == NAN) {
+    tcStat = 1;
   }
-
-  input->stat = sensor.bytes[0] & 0b111;
-
-  uint16_t value = (sensor.value >> 18) & 0x3FFF; // mask off the sign bit and shit to the correct alignment for the temp data  
-  input->temperature = value * 0.25*TEMP_COMPENSATION;
-
-#else ifdef SENSOR_MAX6675
-  sensor.bytes[3] = 0;
-  sensor.bytes[2] = 0;
-  sensor.bytes[1] = SPI.transfer(0x00);
-  sensor.bytes[0] = SPI.transfer(0x00);
-  if (sensor.value & 0x4) {
-    input->stat = TEMP_READ_ERROR;
-    }
   else {
-    
-    uint16_t value = (sensor.value >> 3) & 0x0FFF; // mask off the sign bit and shit to the correct alignment for the temp data  
-    
-    double temp = value *0.25*TEMP_COMPENSATION;
-    // discard wrong readings of the MAX6675
-    if ((temp > MIN_VALID_TEMP_MAX6675) && (temp < MAX_VALID_TEMP_MAX6675)) {
-      input->temperature = temp;
-      input->stat = 0;
-    }
-    else input->stat = TEMP_READ_ERROR;
+    temperature = reading;
+    tcStat = 0;
   }
-
+  
+#ifdef SERIAL_VERBOSE
+       Serial.print("temp: ");
+       Serial.println(round(temperature));
 #endif
-
-  digitalHigh(input->chipSelect); 
+  digitalHigh(PIN_TC_CS); 
 
   if (lcdState == 0) digitalLow(PIN_LCD_CS);
   else digitalHigh(PIN_LCD_CS);

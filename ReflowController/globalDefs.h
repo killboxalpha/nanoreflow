@@ -18,8 +18,9 @@ static const uint8_t TICKS_TO_REDRAW      = 50; //
 const char * ver = "3.2";
 
 
-// ----------------------------------
-Thermocouple A;
+
+double temperature;
+uint8_t tcStat = 0;
 
 double Setpoint;
 double Input;

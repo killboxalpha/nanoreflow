@@ -15,6 +15,7 @@
 #include <Menu.h>
 #include <ClickEncoder.h>
 #include <TimerOne.h>
+#include "max6675.h"
 
 #include "portMacros.h"
 #include "temperature.h"
@@ -78,19 +79,19 @@ uint8_t thermocoupleErrorCount;
 void setupPins(void) {
 
 pinAsOutput(PIN_HEATER);
-digitalHigh(PIN_HEATER); // off
+digitalLow(PIN_HEATER); // off
 pinAsOutput(PIN_FAN);
 digitalHigh(PIN_FAN);
 pinAsInputPullUp(PIN_ZX);
 pinAsOutput(PIN_TC_CS);
 pinAsOutput(PIN_LCD_CS);
-pinAsOutput(A.chipSelect);
+pinAsOutput(PIN_TC_CS);
 #ifdef WITH_BEEPER
     pinAsOutput(PIN_BEEPER);
 #endif
 
 }
-
+// ----------------------------------------------------------------------------
 void killRelayPins(void) {
 Timer1.stop();
 detachInterrupt(INT_ZX);
@@ -184,18 +185,18 @@ void timerIsr(void) { // ticks with 100µS
   }
 
   if (phaseCounter > Channels[CHANNEL_FAN].target) {
-    digitalLow(Channels[CHANNEL_FAN].pin); //PORTD &= ~(1 << Channels[CHANNEL_FAN].pin);
+    digitalLow(Channels[CHANNEL_FAN].pin); 
   }
   else {
-    digitalHigh(Channels[CHANNEL_FAN].pin);//PORTD |=  (1 << Channels[CHANNEL_FAN].pin);
+    digitalHigh(Channels[CHANNEL_FAN].pin);
   }
 
   // wave packet control for heater
   if (Channels[CHANNEL_HEATER].next > lastTicks // FIXME: this looses ticks when overflowing
       && timerTicks > Channels[CHANNEL_HEATER].next) 
   {
-    if (Channels[CHANNEL_HEATER].action) digitalHigh(Channels[CHANNEL_HEATER].pin); //digitalWriteFast(Channels[CHANNEL_HEATER].pin, HIGH);
-    else digitalLow(Channels[CHANNEL_HEATER].pin);//digitalWriteFast(Channels[CHANNEL_HEATER].pin, LOW);
+    if (Channels[CHANNEL_HEATER].action) digitalLow(Channels[CHANNEL_HEATER].pin); //digitalWriteFast(Channels[CHANNEL_HEATER].pin, HIGH);
+    else digitalHigh(Channels[CHANNEL_HEATER].pin);//digitalWriteFast(Channels[CHANNEL_HEATER].pin, LOW);
     lastTicks = timerTicks;
   }
 
@@ -241,25 +242,23 @@ void setup() {
 
 
   
-  // setup /CS line for thermocouple and read initial temperature
-  A.chipSelect = PIN_TC_CS;
-  
+ 
   do {
     // wait for MAX chip to stabilize
    delay(500);
-   readThermocouple(&A);
+   readThermocouple();
   }
-  while ((A.stat == TEMP_READ_ERROR) && (thermocoupleErrorCount++ < TC_ERROR_TOLERANCE));
+  while ((tcStat > 0) && (thermocoupleErrorCount++ < TC_ERROR_TOLERANCE));
     
 
-  if ((A.stat != 0) || (thermocoupleErrorCount  >= TC_ERROR_TOLERANCE)) {
-    abortWithError(A.stat);
+  if ((tcStat != 0) || (thermocoupleErrorCount  >= TC_ERROR_TOLERANCE)) {
+    abortWithError(tcStat);
   }
 
   // initialize moving average filter
-  runningTotalRampRate = A.temperature * NUM_TEMP_READINGS;
+  runningTotalRampRate = temperature * NUM_TEMP_READINGS;
   for(int i = 0; i < NUM_TEMP_READINGS; i++) {
-    airTemp[i].temp = A.temperature;
+    airTemp[i].temp = temperature;
   }
 
   loadFanSpeed();
@@ -437,13 +436,13 @@ void loop(void)
     lastUpdate = zeroCrossTicks;
 
 
-    readThermocouple(&A); // should be sufficient to read it every 250ms or 500ms   
+    readThermocouple(); // should be sufficient to read it every 250ms or 500ms   
 
 
-    if (A.stat > 0) {
+    if (tcStat > 0) {
       thermocoupleErrorCount++;
        if ((thermocoupleErrorCount > TC_ERROR_TOLERANCE) && (currentState != Edit)) {
-        abortWithError(A.stat);
+        abortWithError(tcStat);
       } else thermocoupleErrorCount = 0;
     }
     else {
@@ -451,12 +450,12 @@ void loop(void)
 #if 0 // verbose thermocouple error bits
         tft.setCursor(10, 40);
         for (uint8_t mask = B111; mask; mask >>= 1) {
-          tft.print(mask & A.stat ? '1' : '0');
+          tft.print(mask & tSensor.stat ? '1' : '0');
         }
 #endif
         // rolling average of the temp T1 and T2
         totalT1 -= readingsT1[index];       // subtract the last reading
-        readingsT1[index] = A.temperature;
+        readingsT1[index] = temperature;
         totalT1 += readingsT1[index];       // add the reading to the total
         index = (index + 1) % NUM_TEMP_READINGS;  // next position
         averageT1 = totalT1 / (float)NUM_TEMP_READINGS;  // calculate the average temp
@@ -492,7 +491,7 @@ void loop(void)
       if (currentState > UIMenuEnd) {
         updateProcessDisplay();
       }
-      else displayThermocoupleData(1, tft.height()-16,  &A);
+      else displayThermocoupleData(1, tft.height()-16);
     }
 
     switch (currentState) {

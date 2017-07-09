@@ -160,16 +160,16 @@ void alignRightPrefix(uint16_t v) {
 
 // ----------------------------------------------------------------------------
 
-void displayThermocoupleData(uint8_t xpos, uint8_t ypos, struct Thermocouple* input) {
+void displayThermocoupleData(uint8_t xpos, uint8_t ypos) {
   tft.setCursor(xpos, ypos);
   tft.setTextColor(ST7735_BLACK, ST7735_WHITE);
 
   // temperature
   tft.setTextSize(2);
-  alignRightPrefix((int)A.temperature);
-  switch (input->stat) {
+  alignRightPrefix((int)temperature);
+  switch (tcStat) {
     case 0:
-      tft.print((uint8_t)input->temperature);
+      tft.print((uint8_t)temperature);
       tft.print("\367C");
       break;
     case 1:
@@ -631,8 +631,8 @@ void drawInitialProcessDisplay()
     double estimatedTotalTime = 0;//60 * 12;
     // estimate total run time for current profile
     estimatedTotalTime = activeProfile.soakDuration + activeProfile.peakDuration;
-    estimatedTotalTime += (activeProfile.peakTemp - A.temperature)/(float)activeProfile.rampUpRate;
-    estimatedTotalTime += (activeProfile.peakTemp - A.temperature)/(float)activeProfile.rampDownRate;
+    estimatedTotalTime += (activeProfile.peakTemp - temperature)/(float)activeProfile.rampUpRate;
+    estimatedTotalTime += (activeProfile.peakTemp - temperature)/(float)activeProfile.rampDownRate;
     estimatedTotalTime *= 1.1; // add some spare
     
     tmp = w / estimatedTotalTime ; 
@@ -689,7 +689,7 @@ void updateProcessDisplay() {
   y += menuItemHeight + 2;
 
 
-  displayThermocoupleData(1, y, &A);
+  displayThermocoupleData(1, y);
   
   tft.setTextSize(1);
 
@@ -742,7 +742,7 @@ void updateProcessDisplay() {
   tft.drawPixel(dx, dy, ST7735_BLUE);
 
   // actual temperature
-  dy = h - ((uint16_t)A.temperature * pxPerC / 100) + yOffset;
+  dy = h - ((uint16_t)temperature * pxPerC / 100) + yOffset;
   tft.drawPixel(dx, dy, ST7735_RED);
 
   // bottom line
