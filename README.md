@@ -4,7 +4,7 @@ Reflow Oven Controller
 
 **News**
 
-* Forked from 0xPIT & uploaded the code after a lot of reestructuration
+* Forked from 0xPIT & uploaded the code after a lot of restructuration
 * Board design has also changed
 
 **Arduino-based reflow oven controller with:**
@@ -90,7 +90,7 @@ Obtaining the source code
 
 Get the code using `git`.
 
-	git clone https://github.com/dasaki/reflowOvenController.git
+	git clone https://github.com/dasaki/nanoReflowController.git
 
 or [download a Snapshot].
 
@@ -185,8 +185,8 @@ THE SOFTWARE.
 [Submodule Cheat Sheet]:http://blog.jacius.info/git-submodule-cheat-sheet/
 [ESTechnical]:http://www.estechnical.co.uk
 [Arduino Download]:http://arduino.cc/en/Main/Software
-[folder hardware]:https://github.com/0xPIT/reflowOvenController/tree/master/hardware
-[download a Snapshot]:https://github.com/0xPIT/reflowOvenController/archive/master.zip
+[folder hardware]:https://github.com/dasaki/nanoReflowController/tree/master/hardware
+[download a Snapshot]:https://github.com/dasaki/nanoReflowController/archive/master.zip
 [the library guide]:http://arduino.cc/en/Guide/Libraries
 [PID]:http://en.wikipedia.org/wiki/PID_controller
 [Wave Packet]:http://de.wikipedia.org/wiki/Schwingungspaketsteuerung
