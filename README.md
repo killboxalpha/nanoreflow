@@ -33,7 +33,7 @@ in part based on a project (c) 2013 Ed Simmons <ed@estechnical.co.uk>
 ![BoardPic1] | ![BoardPic2]
 ------------ | -------------
 
-**Completelly populated**
+**Completely populated**
 
 ![Complete1] | ![Complete2] | ![Complete3]
 ------------ | ------------ | -------------
