@@ -4,6 +4,7 @@ BZ1,1,Buzzer,Buzzer_12x9.5RM7.6
 C1,1,10n,C_Disc_D4.3mm_W1.9mm_P5.00mm
 C2,1,100n,C_1206_HandSoldering
 D1,1,1N4007,D_A-405_P5.08mm_Vertical_AnodeUp
+F1,1,Fuse,Fuseholder5x20_horiz_open_inline_Type-I
 J1,1,AC IN 220v,TerminalBlock_Pheonix_MKDS1.5-2pol
 J10,1,CONN_01X17,Pin_Header_Straight_1x17_Pitch2.54mm
 J2,1,HEATER,TerminalBlock_Pheonix_MKDS1.5-2pol
