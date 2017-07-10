@@ -9,14 +9,14 @@ Reflow Oven Controller
 
 **Arduino-based reflow oven controller with:**
 * [PID] loop control
-* [Wave Packet] and [Phase Fired] control for AC outputs
+* [Wave Packet] control for AC output
 * graphic TFT LC-Display, drawing the temperature curves
-  * using an [Adafruit 1.8" TFT] or derivate display
+  * using a 5v compatible 1.8" of 1.44" TFT SPI display with ST7735 controller
 * solely controlled using a cheap rotary encoder and its single button
+* uses a MAX6675 module as interface to a K type thermocouple
 * stores up to 30 temperature profiles in EEPROM
 * configurable PID-parameters
 * simple, small hardware to drive loads up to 600V and up to 2A without heatsink
-* could also be used for slow coockers
 * *Please Note*: Requires Arduino IDE 1.5.x or newer
 
 (c) 2017 David Sanz Kirbis
@@ -37,6 +37,8 @@ in part based on a project (c) 2013 Ed Simmons <ed@estechnical.co.uk>
 
 ![Complete1] | ![Complete2] | ![Complete3]
 ------------ | ------------ | -------------
+
+
 
 <!---
 **Post action shot**
