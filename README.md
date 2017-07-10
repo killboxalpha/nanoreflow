@@ -27,16 +27,17 @@ in part based on a project (c) 2013 Ed Simmons <ed@estechnical.co.uk>
 
 
 
+
+**Minimal build**
+
+![BoardPic1] | ![BoardPic2]
+------------ | -------------
+
 <!---
 **Post action shot**
 
 ![CycleWithOverflow] | ![Warning]
 ------------ | -------------
-**Completed build**
-
-![Completed1] | ![Completed2]
------------- | -------------
-
 
 Introduction
 ====================
@@ -217,5 +218,5 @@ THE SOFTWARE.
 [ImgSCH]:https://raw.githubusercontent.com/0xPIT/reflowOvenController/master/hardware/v0.2.sch.preview.png
 
 [ImgMissingTrace]:https://raw.githubusercontent.com/0xPIT/reflowOvenController/master/images/MissingTrace.jpg
-[Completed1]:https://raw.githubusercontent.com/0xPIT/reflowOvenController/master/images/Completed1.jpg
-[Completed2]:https://raw.githubusercontent.com/0xPIT/reflowOvenController/master/images/Completed2.jpg
+[BoardPic1]:https://raw.githubusercontent.com/dasaki/nanoReflowController/master/images/v1_0_Board_picture_top.jpg
+[BoardPic2]:https://raw.githubusercontent.com/dasaki/nanoReflowController/master/images/v1_0_Board_picture_bottom.jpg
