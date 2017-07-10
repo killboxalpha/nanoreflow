@@ -33,6 +33,11 @@ in part based on a project (c) 2013 Ed Simmons <ed@estechnical.co.uk>
 ![BoardPic1] | ![BoardPic2]
 ------------ | -------------
 
+**Completelly populated**
+
+![Complete1] | ![Complete2] | ![Complete3]
+------------ | ------------ | -------------
+
 <!---
 **Post action shot**
 
@@ -220,3 +225,6 @@ THE SOFTWARE.
 [ImgMissingTrace]:https://raw.githubusercontent.com/0xPIT/reflowOvenController/master/images/MissingTrace.jpg
 [BoardPic1]:https://raw.githubusercontent.com/dasaki/nanoReflowController/master/images/v1_0_Board_picture_top.jpg
 [BoardPic2]:https://raw.githubusercontent.com/dasaki/nanoReflowController/master/images/v1_0_Board_picture_bottom.jpg
+[Complete1]:https://raw.githubusercontent.com/dasaki/nanoReflowController/master/images/v1_0_Board_3d_01.png
+[Complete2]:https://raw.githubusercontent.com/dasaki/nanoReflowController/master/images/v1_0_Board_3d_02.png
+[Complete3]:https://raw.githubusercontent.com/dasaki/nanoReflowController/master/images/v1_0_Board_3d_03.png
