@@ -163,7 +163,7 @@ Licensing
 ```
 The MIT License (MIT)
 
-Copyright (c) 2014 karl@pitrich.com
+Copyright (c) 2017 David Sanz Kirbis
 All rights reserved.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
