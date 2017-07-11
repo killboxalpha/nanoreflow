@@ -39,7 +39,9 @@ in part based on a project (c) 2013 Ed Simmons <ed@estechnical.co.uk>
 ------------ | ------------ | -------------
 
 **Enclosed and mounted on halogen floodlight**
+
 (more info: [Halogen Floodlight SMT reflow])
+
 ![Floodlight]
 --------------
 
