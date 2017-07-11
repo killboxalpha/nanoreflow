@@ -38,6 +38,11 @@ in part based on a project (c) 2013 Ed Simmons <ed@estechnical.co.uk>
 ![Complete1] | ![Complete2] | ![Complete3]
 ------------ | ------------ | -------------
 
+**Enclosed and mounted on halogen floodlight**
+(more info: [Halogen Floodlight SMT reflow])
+![Floodlight]
+--------------
+
 
 
 <!---
@@ -230,3 +235,5 @@ THE SOFTWARE.
 [Complete1]:https://raw.githubusercontent.com/dasaki/nanoReflowController/master/images/v1_0_Board_3d_01.png
 [Complete2]:https://raw.githubusercontent.com/dasaki/nanoReflowController/master/images/v1_0_Board_3d_02.png
 [Complete3]:https://raw.githubusercontent.com/dasaki/nanoReflowController/master/images/v1_0_Board_3d_03.png
+[Floodlight]:https://raw.githubusercontent.com/dasaki/nanoReflowController/master/images/v1_0_floodlight_reflow.jpg
+[Halogen Floodlight SMT reflow]:http://therandomlab.blogspot.com.es/2017/07/halogen-floodlight-smt-reflow.html
