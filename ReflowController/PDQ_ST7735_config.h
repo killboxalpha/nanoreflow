@@ -1,6 +1,7 @@
 #ifndef PDQ_ST7735_CONFIG_H
 #define PDQ_ST7735_CONFIG_H
 
+#include "config.h"
 //
 // PDQ_ST7735 configuration
 //
@@ -40,9 +41,9 @@ enum
 //
 //  * = Typically only 3.3V safe logic-line (unless board has level converter [ala Adafruit]). Be careful with 5V!
 
-#define ST7735_CS_PIN   10      // <= /CS pin (chip-select, LOW to get attention of ST7735, HIGH and it ignores SPI bus)
-#define ST7735_DC_PIN   9     // <= DC pin (1=data or 0=command indicator line) also called RS
-#define ST7735_RST_PIN 8
+#define ST7735_CS_PIN   PIN_LCD_CS      // <= /CS pin (chip-select, LOW to get attention of ST7735, HIGH and it ignores SPI bus)
+#define ST7735_DC_PIN   PIN_LCD_DC     // <= DC pin (1=data or 0=command indicator line) also called RS
+#define ST7735_RST_PIN  PIN_LCD_RST
 // (other pins used are dictated by AVR HW SPI used as shown above)
 
 // other PDQ library options

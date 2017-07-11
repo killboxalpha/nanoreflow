@@ -31,8 +31,8 @@ static const uint8_t LCD_ROTATION = 3; // 0/2-> portrait, 1/3-> landscape
 static const uint8_t PIN_TC_CS   = A1;
 static const uint8_t PIN_TC_DO   = 12;
 static const uint8_t PIN_TC_CLK  = 13;
-static const uint8_t PIN_HEATER = 3; // SSR for the heater
-static const uint8_t PIN_FAN    = A0; // SSR for the fan
+static const uint8_t PIN_HEATER = 3; // 
+static const uint8_t PIN_FAN    = A0; // 
 static const uint8_t PIN_BEEPER = A5; // Beeper Out
 // --- encoder
 static const uint8_t PIN_ENC_A           = A2; // 
