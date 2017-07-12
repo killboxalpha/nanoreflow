@@ -17,6 +17,8 @@ Reflow Oven Controller
 * stores up to 30 temperature profiles in EEPROM
 * configurable PID-parameters
 * simple, small hardware to drive loads up to 600V and up to 2A without heatsink
+* powered throuhg one of three options: 12v RAW pin, 5v pin or 5v USB
+* optional 12v fan control (not yet implemented in the code)
 * *Please Note*: Requires Arduino IDE 1.5.x or newer
 
 (c) 2017 David Sanz Kirbis
