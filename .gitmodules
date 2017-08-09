@@ -11,3 +11,6 @@
 [submodule "libraries/MAX6675-library"]
 	path = libraries/MAX6675-library
 	url = https://github.com/adafruit/MAX6675-library
+[submodule "libraries/encoder"]
+	path = libraries/encoder
+	url = https://github.com/0xPIT/encoder
